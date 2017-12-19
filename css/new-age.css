@@ -1,8 +1,6 @@
 /*!
- * Start Bootstrap - New Age v4.0.0-beta.2 (https://startbootstrap.com/template-overviews/new-age)
- * Copyright 2013-2017 Start Bootstrap
- * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-new-age/blob/master/LICENSE)
- */
+ * Joke Beers
+ * Copyright 2018 -2017 Joke Beers
 html,
 body {
   width: 100%;
@@ -118,9 +116,9 @@ header.masthead {
   padding-top: 150px;
   padding-bottom: 100px;
   color: white;
-  background: url("../img/bg-pattern.png"), #7b4397;
-  background: url("../img/bg-pattern.png"), -webkit-linear-gradient(to left, #7b4397, #dc2430);
-  background: url("../img/bg-pattern.png"), linear-gradient(to left, #7b4397, #dc2430); }
+  background: url("../img/bg-pattern.png"), #fd9d39;
+  background: url("../img/bg-pattern.png"), -webkit-linear-gradient(to left, #fd9d39, #dc2430);
+  background: url("../img/bg-pattern.png"), linear-gradient(to left, #fd9d39, #dc2430); }
   header.masthead .header-content {
     max-width: 500px;
     margin-bottom: 100px;
@@ -196,8 +194,8 @@ section.features .feature-item {
     font-size: 80px;
     display: block;
     margin-bottom: 15px;
-    background: -webkit-linear-gradient(to left, #7b4397, #dc2430);
-    background: linear-gradient(to left, #7b4397, #dc2430);
+    background: -webkit-linear-gradient(to left, #fd9d39, #dc2430);
+    background: linear-gradient(to left, #fd9d39, #dc2430);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent; }
 
