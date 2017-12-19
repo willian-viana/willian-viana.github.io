@@ -11,7 +11,7 @@ var pkg = require('./package.json');
 var banner = ['/*!\n',
   ' * Joke Beers\n',
   ' * Copyright 2018 -' + (new Date()).getFullYear(), ' <%= pkg.author %>\n',
-  ''
+  '/*\n'
 ].join('');
 
 // Compiles SCSS files from /scss into /css
