@@ -15,6 +15,27 @@
     }
   });
 
+  var incrementNode = $('.beer-plus');
+  var decrementNode = $('.beer-minus');
+  var inputNode = $('beer-counter');
+
+  
+
+  incrementNode.on('click', function (event) {
+    event.preventDefault();
+    var currentValue = inputNode.value;
+    inputNode.value = parseInt(currentValue, 0) + 1;
+  });
+
+  decrementNode.on('click', function (event) {
+    event.preventDefault();
+    var currentValue = inputNode.value;
+    if (currentValue > 0) {
+      inputNode.value = parseInt(currentValue, 0) - 1;
+    }
+  });
+
+
   // Closes responsive menu when a scroll trigger link is clicked
   $('.js-scroll-trigger').click(function() {
     $('.navbar-collapse').collapse('hide');
