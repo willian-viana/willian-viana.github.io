@@ -2,7 +2,7 @@
 section.cta {
     position: relative;
     padding: 250px 0;
-    background-image: url('../img/bg-cta.jpg');
+    background-image: url('../img/beer-three.jpg');
     background-position: center;
     @include background-cover;
     .cta-content {
@@ -28,5 +28,8 @@ section.cta {
         width: 100%;
         height: 100%;
         background-color: fade-out(black, .5);
+    }
+    .bg-transparent {
+        background-color: transparent
     }
 }
