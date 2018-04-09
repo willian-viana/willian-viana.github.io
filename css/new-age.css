@@ -230,6 +230,8 @@ section.cta {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5); }
+  section.cta .bg-transparent {
+    background-color: transparent; }
 
 section.contact {
   text-align: center; }
@@ -252,6 +254,10 @@ section.contact {
       background-color: #1da1f2; }
       section.contact ul.list-social li.social-twitter a:hover {
         background-color: #0d95e8; }
+    section.contact ul.list-social li.social-instagram a {
+      background-color: #8a3ab9; }
+      section.contact ul.list-social li.social-instagram a:hover {
+        background-color: #7c34a6; }
     section.contact ul.list-social li.social-facebook a {
       background-color: #3b5998; }
       section.contact ul.list-social li.social-facebook a:hover {
