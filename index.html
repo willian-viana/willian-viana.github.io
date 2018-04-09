@@ -71,7 +71,7 @@
               <div class="device">
                 <div class="screen">
                   <!-- Demo image for screen mockup, you can put an image here, some HTML, an animation, video, or anything else! -->
-                  <img src="img/demo-screen-1.jpg" class="img-fluid" alt="">
+                  <img src="img/beer-one.png" class="img-fluid" alt="">
                 </div>
                 <div class="button">
                   <!-- You can hook the "home button" to some JavaScript events or just remove it -->
@@ -121,7 +121,7 @@
                 <div class="feature-item">
                   <i class="icon-credit-card text-primary"></i>
                   <h3>Brinque com seus amigos de uma forma simples e engraçada</h3>
-                  <p class="text-muted">Um preço justo para garantir a brincadeira com seus amigos. Adquira já por apenas R$ 9,00.</p>
+                  <p class="text-muted">Um preço justo para garantir a brincadeira com seus amigos. Adquira já por apenas R$ 10,00 e Frete grátis</p>
                 </div>
               </div>
             </div>
@@ -187,19 +187,14 @@
         <i class="fa fa-heart"></i>
         com a gente!</h2>
       <ul class="list-inline list-social">
-        <li class="list-inline-item social-twitter">
-          <a href="#">
-            <i class="fa fa-twitter"></i>
+        <li class="list-inline-item social-instagram">
+          <a href="https://www.instagram.com/jokebeers" target="_blank">
+            <i class="fa fa-instagram"></i>
           </a>
         </li>
         <li class="list-inline-item social-facebook">
-          <a href="#">
+          <a href="https://www.facebook.com/Jokebeers.com.br" target="_blank">
             <i class="fa fa-facebook"></i>
-          </a>
-        </li>
-        <li class="list-inline-item social-google-plus">
-          <a href="#">
-            <i class="fa fa-google-plus"></i>
           </a>
         </li>
       </ul>
@@ -222,6 +217,26 @@
       </ul>
     </div>
   </footer>
+
+  <!-- Modal -->
+  <div class="modal fade" id="major-modal" tabindex="-1" role="dialog" aria-labelledby="major-modal" aria-hidden="true" style="z-index: 1">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Você é maior de 18 anos?</h5>
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Este site contém conteúdo não indicado para menores de 18 anos.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Sou maior de idade</button>
+          <button id="minor-button" type="button" class="btn btn-secondary">Sou menor de idade</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Bootstrap core JavaScript -->
   <script src="vendor/jquery/jquery.min.js"></script>

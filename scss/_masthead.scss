@@ -25,6 +25,8 @@ header.masthead {
         margin-left: auto;
         .screen img {
             border-radius: 3px;
+            height: 100%;
+            width: auto;
         }
     }
     @media (min-width: 992px) {
