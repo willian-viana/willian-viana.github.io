@@ -27,6 +27,7 @@ header.masthead {
             border-radius: 3px;
             height: 100%;
             width: auto;
+            max-width: inherit;
         }
     }
     @media (min-width: 992px) {

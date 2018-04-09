@@ -98,7 +98,7 @@
               <div class="device">
                 <div class="screen">
                   <!-- Demo image for screen mockup, you can put an image here, some HTML, an animation, video, or anything else! -->
-                  <img src="img/demo-screen-1.jpg" class="img-fluid" alt="">
+                  <img src="img/beer-two.png" class="img-fluid" alt="">
                 </div>
                 <div class="button">
                   <!-- You can hook the "home button" to some JavaScript events or just remove it -->
@@ -144,36 +144,30 @@
   <section class="cta">
     <div class="cta-content" id="buy">
       <div class="container">
-        <h2>Deixe de apenas rir.
-          <br>Beba.</h2>
-        <div class="beer-counter-wrapper">
-          <div class="beer-plus">
-            <button>+</button>
-          </div>
-          <div class="beer-counter">1</div>
-          <div class="beer-minus">
-            <button>-</button>
-          </div>
-        </div>
-        <a href="#" class="btn btn-outline btn-xl js-scroll-trigger">Finalizar Compra</a>
-
-        <!-- Modal -->
-        <div class="modal fade" id="major-modal" tabindex="-1" role="dialog" aria-labelledby="major-modal" aria-hidden="true" style="z-index: 1">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Você é maior de 18 anos?</h5>
-                  <span aria-hidden="true">&times;</span>
-                </button>
+        <div class="row">
+          <div class="col-sm-5 col-xs-12">
+            <h2>Deixe de apenas rir.
+                <br>Beba.</h2>
+              <div class="beer-counter-wrapper">
+                <div class="beer-plus">
+                  <button>+</button>
+                </div>
+                <div class="beer-counter">1</div>
+                <div class="beer-minus">
+                  <button>-</button>
+                </div>
               </div>
-              <div class="modal-body">
-                Este site contém conteúdo não indicado para menores de 18 anos.
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Sou maior de idade</button>
-                <button id="minor-button" type="button" class="btn btn-secondary">Sou menor de idade</button>
-              </div>
-            </div>
+              <form 
+                action="https://pagseguro.uol.com.br/checkout/v2/cart.html?action=add" 
+                method="post" 
+                onsubmit="PagSeguroLightbox(this); return false;">
+                <!-- NÃO EDITE OS COMANDOS DAS LINHAS ABAIXO -->
+                <input type="hidden" name="itemCode" value="F4DBE771C3C3D6CCC4CC8F9F8F93B45C" />
+                <input type="hidden" name="iot" value="button" />
+                <!-- <input class="btn bg-transparent btn-outline btn-xl js-scroll-trigger" type="button" name="submit" value="Finalizar Compra"> -->
+                <input type="image" src="./img/checkout.png" name="submit" alt="Pague com PagSeguro - é rápido, grátis e seguro!" />
+              </form>
+              <script type="text/javascript" src="https://stc.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.lightbox.js"></script>
           </div>
         </div>
       </div>
