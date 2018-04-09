@@ -17,21 +17,19 @@
 
   var incrementNode = $('.beer-plus');
   var decrementNode = $('.beer-minus');
-  var inputNode = $('beer-counter');
-
-
+  var inputNode = $('.beer-counter');
 
   incrementNode.on('click', function (event) {
     event.preventDefault();
-    var currentValue = inputNode.value;
-    inputNode.value = parseInt(currentValue, 0) + 1;
+    var currentValue = inputNode.text();
+    inputNode.html(parseInt(currentValue, 0) + 1);
   });
 
   decrementNode.on('click', function (event) {
     event.preventDefault();
-    var currentValue = inputNode.value;
-    if (currentValue > 0) {
-      inputNode.value = parseInt(currentValue, 0) - 1;
+    var currentValue = inputNode.text();
+    if (currentValue > 1) {
+      inputNode.html(parseInt(currentValue, 0) - 1);
     }
   });
 

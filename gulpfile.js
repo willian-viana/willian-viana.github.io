@@ -58,6 +58,21 @@ gulp.task('minify-js', function() {
     }))
 });
 
+// Build JS to DEV 
+gulp.task('build-js', function() {
+  return gulp.src('js/new-age.js')
+    .pipe(header(banner, {
+      pkg: pkg
+    }))
+    .pipe(rename({
+      suffix: '.min'
+    }))
+    .pipe(gulp.dest('js'))
+    .pipe(browserSync.reload({
+      stream: true
+    }))
+});
+
 // Copy vendor files from /node_modules into /vendor
 // NOTE: requires `npm install` before running!
 gulp.task('copy', function() {
@@ -103,10 +118,10 @@ gulp.task('browserSync', function() {
 })
 
 // Dev task with browserSync
-gulp.task('dev', ['browserSync', 'sass', 'minify-css', 'minify-js'], function() {
+gulp.task('dev', ['browserSync', 'sass', 'minify-css', 'build-js'], function() {
   gulp.watch('scss/*.scss', ['sass']);
   gulp.watch('css/*.css', ['minify-css']);
-  gulp.watch('js/*.js', ['minify-js']);
+  gulp.watch('js/*.js', ['build-js']);
   // Reloads the browser whenever HTML or JS files change
   gulp.watch('*.html', browserSync.reload);
   gulp.watch('js/**/*.js', browserSync.reload);
