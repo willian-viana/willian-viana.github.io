@@ -206,7 +206,7 @@ section.features .feature-item {
 section.cta {
   position: relative;
   padding: 250px 0;
-  background-image: url("../img/beer-three.png");
+  background-image: url("../img/beer-three.jpg");
   background-position: center;
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -314,6 +314,15 @@ footer {
 .btn-xl {
   font-size: 11px;
   padding: 15px 45px; }
+
+.modal {
+  margin-top: 100px; }
+  @media (max-width: 768px) {
+    .modal .modal-footer {
+      flex-wrap: wrap;
+      justify-content: center; }
+      .modal .modal-footer button {
+        margin-bottom: 10px; } }
 
 .beer-counter-wrapper {
   display: flex;
