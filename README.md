@@ -110,3 +110,14 @@ Edit `src/entities/gift/catalog.json`; images live in `public/gifts`. Prices are
 The catalog and welcome message were imported from https://www.listapresentear.com.br/lista/republica-da-brisinha on 2026-10-29. Katibeh and Zalando Sans are served locally with OFL licenses in `public/fonts`.
 
 Official references: [Turnstile validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/), [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/), [Worker secrets](https://developers.cloudflare.com/workers/configuration/secrets/).
+
+## Portuguese and English experiences
+
+- `/pt/` preserves the original Portuguese content, RSVP, event information and BRL prices. Set Brazilian PIX/InfinitePay checkout links in each item's `paymentUrl` in `src/entities/gift/catalog.json`.
+- `/en/` is a separate gift-focused experience without RSVP, attendance controls, countdown or event logistics. Edit `src/entities/event/content.en.json` for the English welcome, description, subtitle and whether highlights/messages are shown. Its welcome remains an explicit placeholder until supplied.
+- English catalog entries live in `src/entities/gift/catalog.en.json`. Names, descriptions, **USD cents** and international checkout links are independent of Portuguese values. Keep IDs matched to the original catalog to reuse images; the English list can be reordered or shortened independently. Null prices and links display placeholders and cannot initiate payment. No currency conversion or fallback to Brazilian checkout links takes place.
+- UI labels are in `src/shared/i18n/copy.ts`. The shared layout and features accept the locale, rather than maintaining two applications. English messages still use the same protected D1 message endpoint; errors and Turnstile controls are localized.
+
+At `/`, language selection uses a valid `brisinha.locale` browser preference, then the first supported browser language (`pt` or `en`), with English as the fallback. Explicit `/pt` or `/en` URLs always win. The language switcher saves a preference when storage is available; explicit links still work when storage is blocked. Shared section hashes are preserved. Switching from Portuguese attendance to English returns to Home, and `/en/#presenca` cannot display the RSVP form.
+
+`pnpm build` creates actual `dist/pt/index.html` and `dist/en/index.html` files with root-relative assets and the appropriate HTML language. GitHub Pages redirects the slashless directory URLs to their trailing-slash form, so direct links and refreshes work without server rewrites. Localized rendering and static entrypoints are checked by `pnpm test:build`; locale selection is checked by `pnpm test`.

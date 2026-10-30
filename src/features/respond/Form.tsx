@@ -2,8 +2,12 @@ import { useRef, useState, type FormEvent } from 'react';
 import { submissionLimits, type MessageSubmission, type RsvpSubmission } from '../../shared/api/contracts';
 import { Button } from '../../shared/ui/button';
 import { Turnstile } from './Turnstile';
+import { copy } from '../../shared/i18n/copy';
+import type { Locale } from '../../shared/i18n/locale';
 
-export function Form({ rsvp = false }: { rsvp?: boolean }) {
+export function Form({ rsvp: requestedRsvp = false, locale = 'pt' }: { rsvp?: boolean; locale?: Locale }) {
+  const rsvp = locale === 'pt' && requestedRsvp;
+  const c = copy[locale];
   const [attending, setAttending] = useState<boolean | null>(null);
   const [companions, setCompanions] = useState<string[]>([]);
   const [status, setStatus] = useState<{ kind: 'success' | 'error'; message: string } | null>(null);
@@ -28,7 +32,7 @@ export function Form({ rsvp = false }: { rsvp?: boolean }) {
       ? { name, attending: attending!, companions: attending ? companions.map(value => value.trim()) : [], turnstileToken: token }
       : { name, message: String(data.get('message') || '').trim(), turnstileToken: token };
     if (!name || ('message' in payload && !payload.message) || ('companions' in payload && payload.companions.some(value => !value))) {
-      setStatus({ kind: 'error', message: 'Preencha os campos sem usar apenas espaços.' });
+      setStatus({ kind: 'error', message: c.blankFields });
       return;
     }
     submitting.current = true;
@@ -41,14 +45,14 @@ export function Form({ rsvp = false }: { rsvp?: boolean }) {
       });
       const result = await response.json();
       if (!response.ok || result.ok !== true) {
-        throw Error(result.error?.message || 'Não foi possível enviar. Tente novamente.');
+        throw Error(locale === 'pt' ? result.error?.message || c.sendFailed : c.sendFailed);
       }
-      setStatus({ kind: 'success', message: rsvp ? 'Resposta registrada!' : 'Recado registrado!' });
+      setStatus({ kind: 'success', message: rsvp ? 'Resposta registrada!' : c.messageSaved });
       form.reset();
       setCompanions([]);
     } catch (error) {
       const message = error instanceof Error && error.name === 'Error'
-        ? error.message : 'Não foi possível confirmar o envio. Seus dados foram mantidos; tente novamente.';
+        ? error.message : c.networkFailed;
       setStatus({ kind: 'error', message });
     } finally {
       submitting.current = false;
@@ -74,7 +78,7 @@ export function Form({ rsvp = false }: { rsvp?: boolean }) {
         )}
         {(!rsvp || attending !== null) && (
           <>
-            <label className="form-field">Seu nome<input name="name" autoComplete="name" required maxLength={submissionLimits.name} pattern={'.*\\S.*'} /></label>
+            <label className="form-field">{c.name}<input name="name" autoComplete="name" required maxLength={submissionLimits.name} pattern={'.*\\S.*'} /></label>
             {rsvp ? attending && (
               <div className="companions">
                 {companions.map((name, i) => (
@@ -87,11 +91,11 @@ export function Form({ rsvp = false }: { rsvp?: boolean }) {
                 ))}
                 <button className="text-button" type="button" disabled={companions.length >= submissionLimits.companions} onClick={() => setCompanions([...companions, ''])}>+ Adicionar acompanhante</button>
               </div>
-            ) : <label className="form-field">Seu recado<textarea name="message" required maxLength={submissionLimits.message} rows={5} /></label>}
-            {!configured && <p className="form-notice">Envios ainda indisponíveis. Volte em breve.</p>}
-            {configured && <Turnstile key={attempt} siteKey={siteKey} action={rsvp ? 'rsvp' : 'message'} onToken={setToken} onError={setChallengeError} />}
-            {challengeError && <div className="form-notice" role="alert"><p>{challengeError}</p><button className="text-button" type="button" onClick={resetChallenge}>Tentar verificação novamente</button></div>}
-            <Button className="form-submit" disabled={!configured || !token || busy}>{busy ? 'Enviando…' : rsvp ? 'Confirmar resposta' : 'Enviar recado'}</Button>
+            ) : <label className="form-field">{c.message}<textarea name="message" required maxLength={submissionLimits.message} rows={5} /></label>}
+            {!configured && <p className="form-notice">{c.unavailable}</p>}
+            {configured && <Turnstile locale={locale} key={attempt} siteKey={siteKey} action={rsvp ? 'rsvp' : 'message'} onToken={setToken} onError={setChallengeError} />}
+            {challengeError && <div className="form-notice" role="alert"><p>{challengeError}</p><button className="text-button" type="button" onClick={resetChallenge}>{c.retryVerification}</button></div>}
+            <Button className="form-submit" disabled={!configured || !token || busy}>{busy ? c.sending : rsvp ? 'Confirmar resposta' : c.send}</Button>
           </>
         )}
       </fieldset>

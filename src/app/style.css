@@ -198,3 +198,9 @@ button, a { touch-action: manipulation; }
 .form-status[data-kind='error'] { color: #a82f49; }
 .form-status[data-kind='success'] { color: #34613e; }
 .response-form fieldset:disabled { opacity: .7; }
+
+.language-switcher { display: flex; gap: 6px; margin-bottom: 20px; }
+.language-switcher a { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; }
+.language-switcher a[aria-current='page'] { background: #fff; box-shadow: inset 0 0 0 1px var(--border); }
+.language-switcher a:hover { text-decoration: underline; }
+.event-shortcuts.international-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }

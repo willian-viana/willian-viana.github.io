@@ -1,9 +1,12 @@
 import { useEffect, useRef } from 'react';
+import { copy } from '../../shared/i18n/copy';
+import type { Locale } from '../../shared/i18n/locale';
 
 type TurnstileApi = {
   render(container: HTMLElement, options: {
     sitekey: string;
     action: string;
+    language: 'pt-br' | 'en';
     size: 'flexible';
     callback(token: string): void;
     'expired-callback'(): void;
@@ -34,12 +37,14 @@ function loadTurnstile() {
   return loading;
 }
 
-export function Turnstile({ action, siteKey, onToken, onError }: {
+export function Turnstile({ action, siteKey, onToken, onError, locale = 'pt' }: {
+  locale?: Locale;
   action: 'rsvp' | 'message';
   siteKey: string;
   onToken(token: string): void;
   onError(message: string): void;
 }) {
+  const c = copy[locale];
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
     let cancelled = false;
@@ -49,14 +54,14 @@ export function Turnstile({ action, siteKey, onToken, onError }: {
       if (cancelled || !container.current) return;
       api = loaded;
       widget = loaded.render(container.current, {
-        sitekey: siteKey, action, size: 'flexible',
+        sitekey: siteKey, action, size: 'flexible', language: locale === 'pt' ? 'pt-br' : 'en',
         callback: token => { if (!cancelled) { onToken(token); onError(''); } },
-        'expired-callback': () => { if (!cancelled) { onToken(''); onError('A verificação expirou. Verifique novamente.'); } },
-        'error-callback': () => { if (!cancelled) { onToken(''); onError('Não foi possível verificar sua segurança. Tente novamente.'); } return true; },
+        'expired-callback': () => { if (!cancelled) { onToken(''); onError(c.expired); } },
+        'error-callback': () => { if (!cancelled) { onToken(''); onError(c.verificationFailed); } return true; },
       });
-    }).catch(() => { if (!cancelled) onError('Não foi possível carregar a verificação de segurança. Tente novamente.'); });
+    }).catch(() => { if (!cancelled) onError(c.verificationUnavailable); });
     return () => { cancelled = true; if (widget !== undefined) api?.remove(widget); };
-  }, [action, siteKey, onToken, onError]);
+  }, [action, siteKey, onToken, onError, locale, c]);
 
-  return <div className="turnstile-widget" ref={container} role="group" aria-label="Verificação de segurança" />;
+  return <div className="turnstile-widget" ref={container} role="group" aria-label={c.security} />;
 }

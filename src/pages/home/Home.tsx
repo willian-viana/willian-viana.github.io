@@ -6,17 +6,26 @@ import { GiftCard } from '../../features/give-gift/GiftCard';
 import { Form } from '../../features/respond/Form';
 import { Button } from '../../shared/ui/button';
 import { Icon } from '../../shared/ui/icon';
+import { LanguageSwitcher } from '../../features/switch-language/LanguageSwitcher';
+import { giftCatalog } from '../../entities/gift/model';
+import englishContent from '../../entities/event/content.en.json';
+import { copy } from '../../shared/i18n/copy';
+import type { Locale } from '../../shared/i18n/locale';
 
-const sections = [
-  { id: 'inicio', label: 'Início', icon: 'home' },
-  { id: 'presentes', label: 'Presentes', icon: 'gift' },
-  { id: 'presenca', label: 'Presença', icon: 'calendar' },
-  { id: 'recados', label: 'Recados', icon: 'message' },
-] as const;
 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(catalog.event.location)}`;
-const sectionFromHash = () => sections.find(section => `#${section.id}` === window.location.hash)?.id ?? 'inicio';
 
-export function Home() {
+export function Home({ locale = 'pt' }: { locale?: Locale }) {
+  const c = copy[locale];
+  const international = locale === 'en';
+  const items = giftCatalog(locale);
+  const showMessages = !international || englishContent.showMessages;
+  const sections = [
+    { id: 'inicio', label: c.home, icon: 'home' },
+    { id: 'presentes', label: c.gifts, icon: 'gift' },
+    ...(!international ? [{ id: 'presenca', label: c.attendance, icon: 'calendar' } as const] : []),
+    ...(showMessages ? [{ id: 'recados', label: c.messages, icon: 'message' } as const] : []),
+  ] as const;
+  const sectionFromHash = () => sections.find(item => `#${item.id}` === (typeof window === 'undefined' ? '' : window.location.hash))?.id ?? 'inicio';
   const [section, setSection] = useState<string>(sectionFromHash);
   const [showMobileHeader, setShowMobileHeader] = useState(false);
   const sidebar = useRef<HTMLElement>(null);
@@ -26,7 +35,9 @@ export function Home() {
 
   useEffect(() => {
     function navigate() {
-      setSection(sectionFromHash());
+      const next = sectionFromHash();
+      setSection(next);
+      if (window.location.hash && window.location.hash !== `#${next}`) history.replaceState(null, '', `#${next}`);
       content.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
     }
     window.addEventListener('hashchange', navigate);
@@ -43,35 +54,36 @@ export function Home() {
 
   return (
     <>
-      <a className="skip-link" href="#conteudo" onClick={event => { event.preventDefault(); content.current?.focus(); scrollToContent(); }}>Pular para o conteúdo</a>
+      <a className="skip-link" href="#conteudo" onClick={event => { event.preventDefault(); content.current?.focus(); scrollToContent(); }}>{c.skip}</a>
       <header className={`mobile-header${showMobileHeader ? ' is-visible' : ''}`} inert={!showMobileHeader}>
         <span className="event-avatar" aria-hidden="true">R</span>
-        <a href="#inicio"><strong>República da Brisinha</strong><span>sábado, 19 de dezembro · 15h</span></a>
+        <a href="#inicio"><strong>República da Brisinha</strong><span>{international ? englishContent.subtitle : 'sábado, 19 de dezembro · 15h'}</span></a>
       </header>
       <div className="event-layout">
-        <aside className="event-sidebar" aria-label="Sobre o evento" ref={sidebar}>
-          {countdown && <p className="event-countdown"><span aria-hidden="true" />{countdown}</p>}
+        <aside className="event-sidebar" aria-label={c.about} ref={sidebar}>
+          <LanguageSwitcher locale={locale} hash={`#${section}`} />
+          {!international && countdown && <p className="event-countdown"><span aria-hidden="true" />{countdown}</p>}
           <h1>{catalog.event.title}</h1>
-          <p className="event-type">Chá de Panela</p>
-          <ul className="event-facts">
+          <p className="event-type">{international ? englishContent.subtitle : 'Chá de Panela'}</p>
+          {!international && <ul className="event-facts">
             <li><Icon name="calendar" /><span>sábado, 19 de dezembro · 15h</span></li>
             <li><Icon name="pin" /><span>{catalog.event.location}</span></li>
-          </ul>
+          </ul>}
           <div className="event-actions">
-            <Button asChild><a href="#presenca" onClick={scrollToContent}><Icon name="calendar" />Confirmar presença</a></Button>
-            <Button variant="outline" asChild><a href="#presentes" onClick={scrollToContent}><Icon name="list" />Ver lista de presentes</a></Button>
+            {!international && <Button asChild><a href="#presenca" onClick={scrollToContent}><Icon name="calendar" />Confirmar presença</a></Button>}
+            <Button variant="outline" asChild><a href="#presentes" onClick={scrollToContent}><Icon name="list" />{c.viewGifts}</a></Button>
           </div>
-          <nav className="event-shortcuts" aria-label="Atalhos">
-            <a href="#presenca" onClick={scrollToContent}><Icon name="calendar" />Presença</a>
-            <a href="#presentes" onClick={scrollToContent}><Icon name="gift" />Presentes</a>
-            <a href={mapsUrl} target="_blank" rel="noopener noreferrer"><Icon name="pin" />Como chegar<span className="sr-only"> (abre em outra aba)</span></a>
-            <a href="#recados" onClick={scrollToContent}><Icon name="message" />Recados</a>
+          <nav className={`event-shortcuts${international ? ' international-shortcuts' : ''}`} aria-label={c.shortcuts}>
+            {!international && <a href="#presenca" onClick={scrollToContent}><Icon name="calendar" />Presença</a>}
+            <a href="#presentes" onClick={scrollToContent}><Icon name="gift" />{c.gifts}</a>
+            {!international && <a href={mapsUrl} target="_blank" rel="noopener noreferrer"><Icon name="pin" />Como chegar<span className="sr-only"> (abre em outra aba)</span></a>}
+            {showMessages && <a href="#recados" onClick={scrollToContent}><Icon name="message" />{c.messages}</a>}
           </nav>
         </aside>
         <div className="event-content">
           <Tabs.Root value={section} onValueChange={value => { window.location.hash = value; }}>
             <div className="section-navigation">
-              <Tabs.List className="section-tabs" aria-label="Seções da página">
+              <Tabs.List className="section-tabs" aria-label={c.sections}>
                 {sections.map(item => (
                   <Tabs.Trigger value={item.id} key={item.id} className="section-tab" onClick={scrollToContent}>
                     <span><Icon name={item.icon} /></span>{item.label}
@@ -81,22 +93,22 @@ export function Home() {
             </div>
             <main className="page-content" id="conteudo" ref={content} tabIndex={-1}>
               <Tabs.Content value="inicio" className="home-panel">
-                <h2 className="sr-only">Início</h2>
+                <h2 className="sr-only">{c.home}</h2>
                 <div className="surface welcome-card">
-                  <p className="eyebrow">um recado de quem convida</p>
-                  <p className="welcome-message">{catalog.event.welcomeMessage}</p>
-                  <p className="welcome-description">{catalog.event.description}</p>
+                  <p className="eyebrow">{c.welcomeLabel}</p>
+                  <p className="welcome-message">{international ? englishContent.welcomeMessage || 'English welcome message coming soon.' : catalog.event.welcomeMessage}</p>
+                  {(!international || englishContent.description) && <p className="welcome-description">{international ? englishContent.description : catalog.event.description}</p>}
                 </div>
-                <section aria-labelledby="destaques-titulo">
+                {(!international || englishContent.showHighlights) && <section aria-labelledby="destaques-titulo">
                   <div className="section-heading">
-                    <h2 id="destaques-titulo">Para presentear</h2>
-                    <a href="#presentes">Ver lista completa</a>
+                    <h2 id="destaques-titulo">{c.featured}</h2>
+                    <a href="#presentes">{c.viewAll}</a>
                   </div>
                   <div className="featured-gifts">
-                    {catalog.items.slice(0, 3).map(gift => <GiftCard gift={gift} key={gift.id} />)}
+                    {items.slice(0, 3).map(gift => <GiftCard gift={gift} locale={locale} key={gift.id} />)}
                   </div>
-                </section>
-                <section className="surface information-card" aria-labelledby="informacoes-titulo">
+                </section>}
+                {!international && <section className="surface information-card" aria-labelledby="informacoes-titulo">
                   <h2 id="informacoes-titulo">Informações</h2>
                   <dl>
                     <div><dt className="eyebrow">Quando</dt><dd>Sábado, 19 de dezembro de 2026, às 15h</dd></div>
@@ -106,32 +118,32 @@ export function Home() {
                       </dd>
                     </div>
                   </dl>
-                </section>
+                </section>}
               </Tabs.Content>
               <Tabs.Content value="presentes" className="catalog-panel">
-                <h2>Lista de presentes</h2>
-                <div className="catalog-filter"><span>Todos ({catalog.items.length})</span></div>
-                <p className="catalog-note">Presentes simbólicos. Sua contribuição vai diretamente para nós.</p>
+                <h2>{c.giftList}</h2>
+                <div className="catalog-filter"><span>{c.all} ({items.length})</span></div>
+                <p className="catalog-note">{c.giftNote}</p>
                 <div className="gift-grid">
-                  {catalog.items.map(gift => <GiftCard gift={gift} key={gift.id} />)}
+                  {items.map(gift => <GiftCard gift={gift} locale={locale} key={gift.id} />)}
                 </div>
               </Tabs.Content>
-              <Tabs.Content value="presenca" className="rsvp-panel">
+              {!international && <Tabs.Content value="presenca" className="rsvp-panel">
                 <p className="eyebrow">confirmação de presença</p>
                 <h2>Você vem?</h2>
                 <p className="section-description">Sábado, 19 de dezembro, às 15h. Sua resposta ajuda a organizar a festa.</p>
                 <Form rsvp />
-              </Tabs.Content>
-              <Tabs.Content value="recados" className="messages-panel">
-                <h2>Recados</h2>
+              </Tabs.Content>}
+              {showMessages && <Tabs.Content value="recados" className="messages-panel">
+                <h2>{c.messages}</h2>
                 <div className="surface message-card">
-                  <p className="section-description">Deixe uma mensagem de carinho para quem está celebrando.</p>
-                  <Form />
+                  <p className="section-description">{c.messagesDescription}</p>
+                  <Form locale={locale} />
                 </div>
-              </Tabs.Content>
+              </Tabs.Content>}
             </main>
           </Tabs.Root>
-          <footer className="event-footer"><p>República da Brisinha</p><span>Vida longa à República da Brisinha! 🌿🐾</span></footer>
+          <footer className="event-footer"><p>República da Brisinha</p>{!international && <span>Vida longa à República da Brisinha! 🌿🐾</span>}</footer>
         </div>
       </div>
     </>
