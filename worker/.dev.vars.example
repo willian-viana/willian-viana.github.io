@@ -1,0 +1,6 @@
+# Public Cloudflare test secret; ONLY for the local Wrangler environment.
+TURNSTILE_SECRET_KEY="1x0000000000000000000000000000000AA"
+# Supply your own Resend key to test email; never commit it.
+RESEND_API_KEY=""
+RESEND_FROM=""
+HOST_EMAIL=""

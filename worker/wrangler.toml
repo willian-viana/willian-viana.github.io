@@ -1,0 +1,25 @@
+name = "republica-da-brisinha-api"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+ENVIRONMENT = "production"
+ALLOWED_ORIGINS = "https://willian-viana.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "brisinha-rsvps"
+# Replace with the ID returned by `pnpm exec wrangler d1 create brisinha-rsvps`.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[env.local.vars]
+ENVIRONMENT = "local"
+ALLOWED_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173"
+
+[[env.local.d1_databases]]
+binding = "DB"
+database_name = "brisinha-rsvps-local"
+database_id = "00000000-0000-0000-0000-000000000001"
+migrations_dir = "migrations"

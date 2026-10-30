@@ -193,3 +193,8 @@ button, a { touch-action: manipulation; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
 }
+
+.turnstile-widget { margin-top: 20px; min-width: 0; }
+.form-status[data-kind='error'] { color: #a82f49; }
+.form-status[data-kind='success'] { color: #34613e; }
+.response-form fieldset:disabled { opacity: .7; }
