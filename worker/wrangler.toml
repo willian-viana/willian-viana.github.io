@@ -10,8 +10,7 @@ ALLOWED_ORIGINS = "https://willian-viana.github.io"
 [[d1_databases]]
 binding = "DB"
 database_name = "brisinha-rsvps"
-# Replace with the ID returned by `pnpm exec wrangler d1 create brisinha-rsvps`.
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "318d7707-efbd-417e-925a-53ade95b5785"
 migrations_dir = "migrations"
 
 [env.local.vars]

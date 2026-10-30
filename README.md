@@ -49,7 +49,9 @@ All `VITE_*` values are public build-time configuration. Never put secrets in th
 
 ## Cloudflare and Resend setup — manual
 
-**No production resources were created, migrated or deployed by this implementation. Run remote commands only after approving production setup.**
+The Worker is deployed at `https://republica-da-brisinha-api.republica-da-brisinha.workers.dev`. The production D1 database is provisioned and its initial migration has been applied. The GitHub Pages build uses this Worker URL through the `VITE_API_BASE_URL` repository variable. The production Turnstile sitekey and Worker secrets are still pending, so frontend submissions remain disabled until configuration is complete.
+
+The steps below document initial setup. For this account, skip database creation and the initial migration; use the existing binding in `worker/wrangler.toml`. Run further remote changes only after approval.
 
 1. Create a Cloudflare account using Workers Free and D1 Free. Authenticate locally with `pnpm exec wrangler login`. Do not enable paid plans just to follow this guide.
 2. Create the database:
@@ -88,11 +90,11 @@ pnpm exec wrangler d1 execute DB --remote --config worker/wrangler.toml --comman
 
 No public read/list endpoint exposes guests. Export the data privately if needed and delete it when the event no longer requires it. Avoid sharing D1 exports or logging guest contents.
 
-## GitHub Pages and the current blank page
+## GitHub Pages deployment
 
-The live site was confirmed to use **Deploy from a branch → master → /**. That publishes the source `index.html`, including `/src/app/main.tsx`. Browsers cannot execute raw TSX; GitHub serves it with a non-JavaScript MIME type. Changing MIME types or committing `dist` is not the fix.
+GitHub Pages uses **GitHub Actions**, publishing the compiled `dist` artifact. Publishing **master → /** directly previously caused a blank page because browsers cannot execute the raw `/src/app/main.tsx` entrypoint.
 
-**After production approval**, change repository **Settings → Pages → Build and deployment → Source → GitHub Actions**. Set the repository Actions variables above and run **Deploy Pages** on the branch containing these changes. The workflow installs pnpm, checks/tests both apps, builds Vite, verifies the artifact, and uploads **only `dist`**. It deploys on pushes to `main` and the repository's current `master` branch; pull requests only validate/build. A manual dispatch is available. Configure required reviewers on the `github-pages` GitHub environment if each deployment must require explicit approval.
+Set the repository Actions variables above and run **Deploy Pages** on the branch containing these changes. The workflow installs pnpm, checks/tests both apps, builds Vite, verifies the artifact, and uploads **only `dist`**. It deploys on pushes to `main` and the repository's current `master` branch; pull requests only validate/build. A manual dispatch is available. Configure required reviewers on the `github-pages` GitHub environment if each deployment must require explicit approval.
 
 The Vite base is `/` for this user-site repository. Keep build artifacts uncommitted. The site can render before backend credentials are supplied; forms clearly remain disabled until both public configuration values are available.
 
