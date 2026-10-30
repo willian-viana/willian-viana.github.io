@@ -43,7 +43,7 @@ export function Form({ rsvp = false }: { rsvp?: boolean }) {
       if (!response.ok || result.ok !== true) {
         throw Error(result.error?.message || 'Não foi possível enviar. Tente novamente.');
       }
-      setStatus({ kind: 'success', message: rsvp ? 'Resposta registrada!' : 'Recado encaminhado por email!' });
+      setStatus({ kind: 'success', message: rsvp ? 'Resposta registrada!' : 'Recado registrado!' });
       form.reset();
       setCompanions([]);
     } catch (error) {
@@ -53,7 +53,7 @@ export function Form({ rsvp = false }: { rsvp?: boolean }) {
     } finally {
       submitting.current = false;
       setBusy(false);
-      // Siteverify tokens are single-use, including when storage or email fails afterward.
+      // Siteverify tokens are single-use, including when storage fails afterward.
       resetChallenge();
     }
   }

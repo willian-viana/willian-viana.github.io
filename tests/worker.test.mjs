@@ -1,31 +1,29 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import worker from '../worker/src/index.ts';
 
 const origin = 'https://willian-viana.github.io';
 const validRsvp = { name: ' Ana ', attending: true, companions: [' Bruno '], turnstileToken: 'token' };
 const validMessage = { name: 'Ana', message: 'Felicidades!', turnstileToken: 'token' };
 
-function setup(t, { verify, emailStatus = 200, emailBody = { id: 'email-id' } } = {}) {
+function setup(t, { verify } = {}) {
   const db = new DatabaseSync(':memory:');
-  db.exec(readFileSync('worker/migrations/0001_create_rsvps.sql', 'utf8'));
+  for (const file of readdirSync('worker/migrations').filter(name => name.endsWith('.sql')).sort()) {
+    db.exec(readFileSync(`worker/migrations/${file}`, 'utf8'));
+  }
   t.after(() => db.close());
   const calls = [];
   t.mock.method(globalThis, 'fetch', async (url, options) => {
     calls.push({ url, options });
-    if (url === 'https://challenges.cloudflare.com/turnstile/v0/siteverify') {
-      const action = calls.expectedAction || 'rsvp';
-      return Response.json(verify === undefined ? { success: true, hostname: new URL(origin).hostname, action } : verify);
-    }
-    assert.equal(url, 'https://api.resend.com/emails');
-    return Response.json(emailBody, { status: emailStatus });
+    assert.equal(url, 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
+    const action = calls.expectedAction || 'rsvp';
+    return Response.json(verify === undefined ? { success: true, hostname: new URL(origin).hostname, action } : verify);
   });
   const env = {
     ALLOWED_ORIGINS: origin, ENVIRONMENT: 'production',
-    TURNSTILE_SECRET_KEY: 'test-fixture-secret', RESEND_API_KEY: 'test-fixture-resend',
-    RESEND_FROM: 'Event <event@example.com>', HOST_EMAIL: 'host@example.com',
+    TURNSTILE_SECRET_KEY: 'test-fixture-secret',
     DB: {
       prepare(sql) {
         return { bind(...values) { return { async run() { db.prepare(sql).run(...values); return { success: true }; } }; } };
@@ -152,58 +150,57 @@ test('database errors return a retryable error rather than false success', async
   assert.equal((await response.json()).error.code, 'STORAGE_UNAVAILABLE');
 });
 
-test('message sends fixed sender/recipient and plain text to Resend after verification', async t => {
-  const { send, calls } = setup(t);
+test('message is stored privately with trimmed text, generated ID and UTC timestamp', async t => {
+  const { send, calls, db } = setup(t);
   calls.expectedAction = 'message';
-  const response = await send('/api/message', { ...validMessage, name: '<b>Ana</b>', message: '<script>hello</script>' });
-  assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { ok: true });
-  assert.equal(calls.length, 2);
-  const email = JSON.parse(calls[1].options.body);
-  assert.deepEqual(email.to, ['host@example.com']);
-  assert.equal(email.from, 'Event <event@example.com>');
-  assert.equal(email.subject, 'Novo recado — República da Brisinha');
-  assert.equal(email.text, 'De: <b>Ana</b>\n\n<script>hello</script>');
-  assert.equal(email.html, undefined);
+  const name = "Robert'); DROP TABLE messages;--";
+  const response = await send('/api/message', { ...validMessage, name, message: '  <script>hello</script>  ' });
+  assert.equal(response.status, 201);
+  const result = await response.json();
+  assert.equal(result.ok, true);
+  const row = db.prepare('SELECT * FROM messages WHERE id = ?').get(result.id);
+  assert.equal(row.guest_name, name);
+  assert.equal(row.message, '<script>hello</script>');
+  assert.match(row.created_at, /^\d{4}-\d\d-\d\dT.*Z$/);
+  assert.equal(calls.length, 1);
+  assert.equal(db.prepare('SELECT count(*) AS n FROM rsvps').get().n, 0);
 });
 
-test('invalid or unconfigured messages never contact providers', async t => {
-  const { send, env, calls } = setup(t);
+test('invalid messages never verify or write', async t => {
+  const { send, calls, db } = setup(t);
   for (const message of ['', ' ', 'a'.repeat(3001), 5]) {
     assert.equal((await send('/api/message', { ...validMessage, message })).status, 400);
   }
-  env.RESEND_API_KEY = '';
-  assert.equal((await send('/api/message', validMessage)).status, 503);
   assert.equal(calls.length, 0);
+  assert.equal(db.prepare('SELECT count(*) AS n FROM messages').get().n, 0);
 });
 
-test('messages reach both configured hosts and ignore guest-supplied recipients', async t => {
-  const { send, env, calls } = setup(t);
-  calls.expectedAction = 'message';
-  env.HOST_EMAIL = ' host@example.com, cohost@example.com ';
-  const response = await send('/api/message', { ...validMessage, to: ['someone-else@example.com'] });
-  assert.equal(response.status, 200);
-  assert.deepEqual(JSON.parse(calls[1].options.body).to, ['host@example.com', 'cohost@example.com']);
+test('failed message challenge blocks storage', async t => {
+  const { send, db } = setup(t, { verify: { success: false } });
+  assert.equal((await send('/api/message', validMessage)).status, 403);
+  assert.equal(db.prepare('SELECT count(*) AS n FROM messages').get().n, 0);
 });
 
-test('empty or invalid recipient configuration fails before contacting providers', async t => {
-  const { send, env, calls } = setup(t);
-  for (const recipients of ['', ' ', 'host@example.com,', 'not-an-email', 'host@example.com,invalid']) {
-    env.HOST_EMAIL = recipients;
-    assert.equal((await send('/api/message', validMessage)).status, 503);
-  }
-  assert.equal(calls.length, 0);
-});
-
-for (const emailStatus of [429, 500]) {
-  test(`Resend ${emailStatus} never produces false success or leaks provider errors`, async t => {
-    const { send, calls } = setup(t, { emailStatus, emailBody: { message: 'private diagnostic' } });
+for (const mode of ['throw', 'unsuccessful']) {
+  test(`message database failure (${mode}) never reports success or leaks details`, async t => {
+    const { send, env, calls } = setup(t);
     calls.expectedAction = 'message';
+    env.DB.prepare = () => {
+      if (mode === 'throw') throw Error('private database details');
+      return { bind() { return { async run() { return { success: false }; } }; } };
+    };
     const response = await send('/api/message', validMessage);
-    assert.equal(response.status, 502);
-    assert.ok(!(await response.text()).includes('private diagnostic'));
+    assert.equal(response.status, 503);
+    assert.equal((await response.json()).error.code, 'STORAGE_UNAVAILABLE');
   });
 }
+
+test('message table enforces name and message limits', t => {
+  const { db } = setup(t);
+  for (const [name, message] of [['', 'hello'], ['a'.repeat(121), 'hello'], ['Ana', ''], ['Ana', 'a'.repeat(3001)]]) {
+    assert.throws(() => db.prepare('INSERT INTO messages (id, guest_name, message) VALUES (?, ?, ?)').run(crypto.randomUUID(), name, message));
+  }
+});
 
 test('migration rejects inconsistent attendance and non-array companion data', t => {
   const { db } = setup(t);
@@ -219,9 +216,3 @@ for (const verify of [null, { success: 'true' }, { success: false, 'error-codes'
     assert.equal(db.prepare('SELECT count(*) AS n FROM rsvps').get().n, 0);
   });
 }
-
-test('a Resend response without an email ID cannot claim success', async t => {
-  const { send, calls } = setup(t, { emailBody: {} });
-  calls.expectedAction = 'message';
-  assert.equal((await send('/api/message', validMessage)).status, 502);
-});

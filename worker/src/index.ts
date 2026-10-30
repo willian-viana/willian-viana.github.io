@@ -5,9 +5,6 @@ export interface Env {
   ALLOWED_ORIGINS: string;
   ENVIRONMENT: 'production' | 'local';
   TURNSTILE_SECRET_KEY: string;
-  RESEND_API_KEY: string;
-  RESEND_FROM: string;
-  HOST_EMAIL: string;
 }
 
 class HttpError extends Error {
@@ -146,29 +143,16 @@ export default {
         return json({ ok: true, id }, 201);
       }
       const message = text(body.message, submissionLimits.message, 'Seu recado');
-      const recipients = (env.HOST_EMAIL || '').split(',').map(email => email.trim());
-      if (!env.RESEND_API_KEY || !env.RESEND_FROM || recipients.some(email => !/^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/.test(email))) {
-        throw new HttpError(503, 'NOT_CONFIGURED', 'O envio de recados está indisponível.');
-      }
       await verifyTurnstile(token, 'message', origin, request, env);
+      const id = crypto.randomUUID();
       try {
-        const response = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: env.RESEND_FROM, to: recipients,
-            subject: 'Novo recado — República da Brisinha',
-            text: `De: ${name}\n\n${message}`,
-          }),
-          signal: AbortSignal.timeout(10_000),
-        });
-        if (!response.ok) throw Error();
-        const result: { id?: string } = await response.json();
-        if (!result.id) throw Error();
+        const result = await env.DB.prepare('INSERT INTO messages (id, guest_name, message) VALUES (?, ?, ?)')
+          .bind(id, name, message).run();
+        if (!result.success) throw Error();
       } catch {
-        throw new HttpError(502, 'EMAIL_UNAVAILABLE', 'Não foi possível enviar seu recado. Tente novamente.');
+        throw new HttpError(503, 'STORAGE_UNAVAILABLE', 'Não foi possível salvar seu recado. Tente novamente.');
       }
-      return json({ ok: true }, 200);
+      return json({ ok: true, id }, 201);
     } catch (error) {
       const failure = error instanceof HttpError ? error : new HttpError(500, 'INTERNAL_ERROR', 'Ocorreu um erro. Tente novamente.');
       return json({ error: { code: failure.code, message: failure.message } }, failure.status);

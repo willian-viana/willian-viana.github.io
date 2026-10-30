@@ -1,8 +1,8 @@
 # República da Brisinha
 
-React + TypeScript + Vite frontend on GitHub Pages, with a Cloudflare Worker, D1 RSVP storage, Resend email and Turnstile spam protection. pnpm is the only package manager. The Worker uses native `fetch` and prepared SQL, without an HTTP framework, ORM or Resend SDK.
+React + TypeScript + Vite frontend on GitHub Pages, with a Cloudflare Worker, D1 storage and Turnstile spam protection. pnpm is the only package manager. The Worker uses native `fetch` and prepared SQL without an HTTP framework or ORM.
 
-Frontend FSD layers: `app` composes `pages`; pages compose `features` and `entities`; `shared` contains UI and API contracts. The backend lives separately in `worker/`. Gifts and payments remain static and external.
+Frontend FSD layers: `app` composes `pages`; pages compose `features` and `entities`; `shared` contains UI and API contracts. The backend lives in `worker/`. Gifts remain static and payments happen through external links.
 
 ## Development and checks
 
@@ -16,123 +16,97 @@ pnpm db:migrate:local
 pnpm worker:dev
 ```
 
-In another terminal run `pnpm dev`. Open `http://localhost:5173` or `http://127.0.0.1:5173`. The Worker listens on port 8787 and persists its **local** D1 database under `worker/.wrangler`. Local migrations and `worker:dev` use `--env local`; they do not contact production D1.
+In another terminal run `pnpm dev`. Open `http://localhost:5173` or `http://127.0.0.1:5173`. The Worker listens on port 8787; the local D1 database persists under `worker/.wrangler`. Local migrations and `worker:dev` use `--env local` and do not access production D1.
 
-The example files contain Cloudflare's **public test keys**, which always pass. Local verification still calls Siteverify, so an internet connection is needed. The Worker permits dummy keys only in its `local` environment and for a localhost/127.0.0.1 frontend origin. Production rejects them. To test rejection, use Cloudflare's documented failing sitekey/secret pair in your ignored local files.
-
-RSVP works locally without a Cloudflare account. Local **email** testing requires a Resend API key and sender/recipient in `worker/.dev.vars.local`; there is no fake success mode. For safe email testing use Resend's test recipient `delivered@resend.dev` with your account's authorized sender, rather than a real guest/host inbox. Restart Wrangler after changing secrets.
+The example files contain Cloudflare's **public test keys**, which always pass. Local verification still calls Siteverify, so an internet connection is needed. Dummy keys are permitted only in the Worker's `local` environment for localhost/127.0.0.1 origins. Production rejects them. Restart Wrangler after changing its secret file.
 
 ```sh
-pnpm test          # Critical API behavior; providers mocked, real SQLite migration
+pnpm test          # Critical API behavior with real SQLite migrations
 pnpm typecheck    # Frontend and Worker types
 pnpm worker:check # Bundle Worker with Wrangler --dry-run; does not deploy
 pnpm build
-pnpm test:build    # Assert dist/index.html references built JS, never raw TSX
-pnpm preview      # Inspect the production frontend
+pnpm test:build    # Ensure the Pages artifact uses compiled JS, never raw TSX
+pnpm preview
 ```
 
 ## Configuration
 
 | Location | Name | Value |
 | --- | --- | --- |
-| Frontend `.env.local` / GitHub Actions repository variable | `VITE_API_BASE_URL` | Worker origin, e.g. `https://republica-da-brisinha-api.YOUR-SUBDOMAIN.workers.dev`, **without `/api`** |
-| Frontend `.env.local` / GitHub Actions repository variable | `VITE_TURNSTILE_SITE_KEY` | Public Turnstile widget sitekey |
-| Worker `wrangler.toml` vars | `ALLOWED_ORIGINS` | Comma-separated **exact origins**, no paths or trailing slash |
-| Worker `wrangler.toml` vars | `ENVIRONMENT` | `production` (or `local` for local development) |
-| Worker secret | `TURNSTILE_SECRET_KEY` | Private Turnstile verification secret |
-| Worker secret | `RESEND_API_KEY` | Resend sending API key |
-| Worker secret | `RESEND_FROM` | Verified sender, e.g. `República da Brisinha <convite@your-domain.com>` |
-| Worker secret | `HOST_EMAIL` | One destination email or a comma-separated list, e.g. `host@example.com,cohost@example.com` |
-| Worker D1 binding | `DB` | Database configured by its public ID in `worker/wrangler.toml` |
+| Frontend / GitHub Actions repository variable | `VITE_API_BASE_URL` | Worker origin without `/api` |
+| Frontend / GitHub Actions repository variable | `VITE_TURNSTILE_SITE_KEY` | Public Turnstile sitekey |
+| Worker vars | `ALLOWED_ORIGINS` | Comma-separated exact frontend origins, no paths or trailing slash |
+| Worker vars | `ENVIRONMENT` | `production` or `local` |
+| Worker secret | `TURNSTILE_SECRET_KEY` | Private Turnstile verification key |
+| Worker D1 binding | `DB` | Existing database `brisinha-rsvps` |
 
-All `VITE_*` values are public build-time configuration. Never put secrets in them. `.env.local`, `.dev.vars*`, `.wrangler`, `dist` and `.worker-build` are ignored. Only sanitized example files are committed. Do not paste actual credentials into documentation, code or chat.
+All `VITE_*` values are public build-time configuration. Never put secrets in them. `.env.local`, `.dev.vars*`, `.wrangler`, `dist` and `.worker-build` are ignored; only sanitized examples are committed.
 
-## Cloudflare and Resend setup — manual
+The production Worker is at `https://republica-da-brisinha-api.republica-da-brisinha.workers.dev`. Its D1 binding and the frontend API URL are configured. Turnstile is configured for the current GitHub Pages hostname. Both migrations are applied and the deployed Worker stores RSVPs and messages in their respective tables.
 
-The Worker is deployed at `https://republica-da-brisinha-api.republica-da-brisinha.workers.dev`. The production D1 database is provisioned and its initial migration has been applied. The GitHub Pages build uses this Worker URL through the `VITE_API_BASE_URL` repository variable. The production Turnstile sitekey and Worker secrets are still pending, so frontend submissions remain disabled until configuration is complete.
+For an initial setup on another account, create a D1 database with `pnpm exec wrangler d1 create brisinha-rsvps --config worker/wrangler.toml`, then update the production database ID in that file. Keep the local binding separate.
 
-The steps below document initial setup. For this account, skip database creation and the initial migration; use the existing binding in `worker/wrangler.toml`. Run further remote changes only after approval.
-
-1. Create a Cloudflare account using Workers Free and D1 Free. Authenticate locally with `pnpm exec wrangler login`. Do not enable paid plans just to follow this guide.
-2. Create the database:
-
-   ```sh
-   pnpm exec wrangler d1 create brisinha-rsvps --config worker/wrangler.toml
-   ```
-
-   Replace the **top-level** `database_id` placeholder in `worker/wrangler.toml` with the returned ID. Keep `binding = "DB"`, `database_name = "brisinha-rsvps"` and `migrations_dir = "migrations"`. Leave the separate local binding unchanged. Database IDs are not credentials.
-3. Create a **Managed Turnstile widget**, allowing `willian-viana.github.io` (and your custom frontend domain if applicable). Do not allow localhost on the production widget. Put its sitekey into the frontend/GitHub variable and its matching secret into the Worker. The widget sets the action to `rsvp` or `message`; the server checks both action and frontend hostname.
-4. In Resend, create a sending API key and verify a sender domain you control through its DNS records. A GitHub-owned `github.io` domain cannot be verified as your sender domain. Resend's onboarding sender is for restricted account testing, not arbitrary production recipients. Until verification completes, configure only your Resend account email as the recipient. After verification, `HOST_EMAIL` can include both hosts separated by a comma. Guest input never controls the recipients, sender or subject.
-5. Set secrets using Wrangler's interactive prompts (no secret values in command history):
-
-   ```sh
-   pnpm exec wrangler secret put TURNSTILE_SECRET_KEY --config worker/wrangler.toml
-   pnpm exec wrangler secret put RESEND_API_KEY --config worker/wrangler.toml
-   pnpm exec wrangler secret put RESEND_FROM --config worker/wrangler.toml
-   pnpm exec wrangler secret put HOST_EMAIL --config worker/wrangler.toml
-   ```
-
-6. Confirm the production `ALLOWED_ORIGINS` is correct. Then, **after approval**, migrate and deploy:
-
-   ```sh
-   pnpm db:migrate:remote
-   pnpm worker:deploy
-   ```
-
-   Record the URL printed by Wrangler as `VITE_API_BASE_URL`. There is no automatic Worker production deploy workflow.
-7. Build/deploy the frontend with both public variables configured. Verify RSVP, then inspect D1 in the Cloudflare dashboard; verify a recado in Resend's dashboard and the host inbox. Successful API submission means Resend accepted the email, not guaranteed inbox delivery.
-
-To inspect RSVPs privately, use the D1 dashboard or, after approval for production access:
+Create a Managed Turnstile widget allowing the frontend hostname, then configure its private key:
 
 ```sh
-pnpm exec wrangler d1 execute DB --remote --config worker/wrangler.toml --command 'SELECT guest_name, attending, companions_json, created_at FROM rsvps ORDER BY created_at DESC'
+pnpm exec wrangler secret put TURNSTILE_SECRET_KEY --config worker/wrangler.toml --env ""
 ```
 
-No public read/list endpoint exposes guests. Export the data privately if needed and delete it when the event no longer requires it. Avoid sharing D1 exports or logging guest contents.
+Set its public sitekey as the repository variable above and rebuild the frontend. Do not use production keys on localhost. When switching the frontend to a custom domain, update both Turnstile's allowed hostnames and `ALLOWED_ORIGINS`.
 
-## GitHub Pages deployment
+## Deployment
 
-GitHub Pages uses **GitHub Actions**, publishing the compiled `dist` artifact. Publishing **master → /** directly previously caused a blank page because browsers cannot execute the raw `/src/app/main.tsx` entrypoint.
+Production changes require approval. Apply migrations before deploying the updated Worker:
 
-Set the repository Actions variables above and run **Deploy Pages** on the branch containing these changes. The workflow installs pnpm, checks/tests both apps, builds Vite, verifies the artifact, and uploads **only `dist`**. It deploys on pushes to `main` and the repository's current `master` branch; pull requests only validate/build. A manual dispatch is available. Configure required reviewers on the `github-pages` GitHub environment if each deployment must require explicit approval.
+```sh
+pnpm db:migrate:remote
+pnpm worker:deploy
+```
 
-The Vite base is `/` for this user-site repository. Keep build artifacts uncommitted. The site can render before backend credentials are supplied; forms clearly remain disabled until both public configuration values are available.
+Migration `0001_create_rsvps.sql` creates RSVPs; `0002_create_messages.sql` adds messages without changing existing RSVP data. There is no automatic Worker production deploy workflow.
+
+GitHub Pages uses **GitHub Actions**, publishing only the compiled `dist` artifact. Publishing `master → /` directly previously caused a blank page because the browser cannot execute the raw TSX entrypoint. The Vite base is `/` for this user-site repository.
+
+The Pages workflow installs pnpm, tests and checks both apps, builds Vite and validates the artifact. Pushes to `main` or `master` deploy; pull requests only validate/build. Manual dispatch is also available. Configure required reviewers on the `github-pages` environment if each deployment must require approval. Keep generated build artifacts uncommitted.
+
+## Viewing guests and messages
+
+In Cloudflare, open **D1 → brisinha-rsvps → Explore Data**, then choose:
+
+- `rsvps`: guest name, attendance (`1` attending, `0` declining), companion names and UTC submission time.
+- `messages`: guest name, message text and UTC submission time.
+
+The Console can query either table:
+
+```sql
+SELECT guest_name, attending, companions_json, created_at
+FROM rsvps ORDER BY created_at DESC;
+
+SELECT guest_name, message, created_at
+FROM messages ORDER BY created_at DESC;
+```
+
+These records stay private in D1. There is no public read endpoint, guestbook feed or admin page. Guest text is stored as text and must not be rendered as raw HTML. Export privately when needed and delete records when they are no longer required.
 
 ## API contract
 
-Both endpoints require `Origin` matching `ALLOWED_ORIGINS`, `Content-Type: application/json` and a valid single-use `turnstileToken` (max 2048 characters). CORS permits only POST/OPTIONS and Content-Type; no cookies or credentialed requests are used. CORS is a browser policy, not authentication: Turnstile is always verified server-side.
+Both endpoints require an allowed `Origin`, `Content-Type: application/json` and a valid single-use `turnstileToken` (max 2048 characters). CORS permits POST/OPTIONS and Content-Type without cookies. Turnstile verification checks the action and frontend hostname before writing.
 
-```json
-POST /api/rsvp
-{
-  "name": "Ana",
-  "attending": true,
-  "companions": ["Bruno"],
-  "turnstileToken": "token-from-widget"
-}
-```
+- `POST /api/rsvp`: `{ name, attending, companions: string[], turnstileToken }`. Names must be nonempty strings of at most 120 characters; attendance is a boolean; up to 10 companions are allowed, or none when declining.
+- `POST /api/message`: `{ name, message, turnstileToken }`. Name must be nonempty text of at most 120 characters; message must be nonempty text of at most 3000 characters.
 
-Names must be nonempty text, max 120 characters; whitespace is trimmed. `attending` must be a boolean. `companions` must be an array of up to 10 valid names and must be empty for a decline. Success: HTTP 201 `{ "ok": true, "id": "uuid" }` only after D1 confirms the insert. Schema: UUID ID, guest name, attendance integer, companion names as a JSON array and UTC creation timestamp.
+Text is trimmed. Both routes return HTTP **201** with `{ "ok": true, "id": "uuid" }` only after D1 confirms the insert. Each table stores a generated ID and UTC creation timestamp.
 
-```json
-POST /api/message
-{
-  "name": "Ana",
-  "message": "Felicidades!",
-  "turnstileToken": "token-from-widget"
-}
-```
+Errors use `{ "error": { "code": "INVALID_INPUT", "message": "Readable message" } }`: 400 invalid JSON/fields, 403 origin/token/context failure, 404 unknown path, 405 unsupported method, 413 payload over 16 KiB, 415 wrong content type, and 503 configuration/Turnstile/D1 failure. Private upstream details are not returned.
 
-Message text must be nonempty, max 3000 characters. Success: HTTP 200 `{ "ok": true }` only after Resend accepts the request and returns an email ID. Only plain text is sent; guest HTML is never rendered. Guest messages are not stored in D1.
+The frontend locks the form during submission, preserves fields on failure, displays success only after storage succeeds and refreshes the Turnstile token after each API attempt. Siteverify times out after 10 seconds; the frontend times out after 30 seconds.
 
-Errors use `{ "error": { "code": "INVALID_INPUT", "message": "Readable message" } }`: 400 invalid JSON/fields, 403 origin/token/context failure, 404 unknown path, 405 unsupported method, 413 payload over 16 KiB (including streamed requests), 415 wrong content type, 502 Resend failure, 503 missing configuration/provider/D1 failure. Upstream details and secrets are never returned. Outbound provider calls time out after 10 seconds; the frontend times out after 30 seconds, retains values on failure and obtains a new Turnstile token after every API attempt. Loading locks the form and prevents simultaneous submissions.
-
-RSVP storage is append-only. There is no guest identity, editing, deduplication by name, public guestbook or admin UI. A retry after an ambiguous network failure may create a duplicate or send another message; check the dashboard before manually retrying important submissions. Turnstile reduces spam but does not guarantee abuse prevention or unlimited free usage. Monitor provider dashboards/quotas.
+Storage is append-only. There is no identity-based deduplication or editing. Retrying an ambiguous network failure can create a duplicate. Turnstile reduces spam; monitor Cloudflare's free-tier quotas.
 
 ## Static content
 
-Edit `src/entities/gift/catalog.json`; images are in `public/gifts`. Prices are integer BRL cents from the reference's base values, without its platform surcharge. Set each `paymentUrl` to an HTTPS payment link payable directly to the hosts. No payment processing or payment credentials are handled here.
+Edit `src/entities/gift/catalog.json`; images live in `public/gifts`. Prices are integer BRL cents from the reference's base values, without its platform surcharge. Set each `paymentUrl` to an HTTPS payment link payable directly to the hosts. No payment credentials are handled here.
 
-Imported from https://www.listapresentear.com.br/lista/republica-da-brisinha on 2026-10-29. The original welcome message and event details are preserved. Katibeh and Zalando Sans are served locally, with OFL licenses in `public/fonts`.
+The catalog and welcome message were imported from https://www.listapresentear.com.br/lista/republica-da-brisinha on 2026-10-29. Katibeh and Zalando Sans are served locally with OFL licenses in `public/fonts`.
 
-Official setup references: [Turnstile server validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/), [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/), [Worker secrets](https://developers.cloudflare.com/workers/configuration/secrets/), [Resend send API](https://resend.com/docs/api-reference/emails/send-email).
+Official references: [Turnstile validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/), [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/), [Worker secrets](https://developers.cloudflare.com/workers/configuration/secrets/).
