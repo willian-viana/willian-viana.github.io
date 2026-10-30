@@ -42,7 +42,7 @@ pnpm preview      # Inspect the production frontend
 | Worker secret | `TURNSTILE_SECRET_KEY` | Private Turnstile verification secret |
 | Worker secret | `RESEND_API_KEY` | Resend sending API key |
 | Worker secret | `RESEND_FROM` | Verified sender, e.g. `República da Brisinha <convite@your-domain.com>` |
-| Worker secret | `HOST_EMAIL` | Host's destination email |
+| Worker secret | `HOST_EMAIL` | One destination email or a comma-separated list, e.g. `host@example.com,cohost@example.com` |
 | Worker D1 binding | `DB` | Database configured by its public ID in `worker/wrangler.toml` |
 
 All `VITE_*` values are public build-time configuration. Never put secrets in them. `.env.local`, `.dev.vars*`, `.wrangler`, `dist` and `.worker-build` are ignored. Only sanitized example files are committed. Do not paste actual credentials into documentation, code or chat.
@@ -60,7 +60,7 @@ All `VITE_*` values are public build-time configuration. Never put secrets in th
 
    Replace the **top-level** `database_id` placeholder in `worker/wrangler.toml` with the returned ID. Keep `binding = "DB"`, `database_name = "brisinha-rsvps"` and `migrations_dir = "migrations"`. Leave the separate local binding unchanged. Database IDs are not credentials.
 3. Create a **Managed Turnstile widget**, allowing `willian-viana.github.io` (and your custom frontend domain if applicable). Do not allow localhost on the production widget. Put its sitekey into the frontend/GitHub variable and its matching secret into the Worker. The widget sets the action to `rsvp` or `message`; the server checks both action and frontend hostname.
-4. In Resend, create a sending API key and verify a sender domain you control through its DNS records. A GitHub-owned `github.io` domain cannot be verified as your sender domain. Resend's onboarding sender is for restricted account testing, not arbitrary production recipients. Set a fixed host recipient; guest input never controls the recipient, sender or subject.
+4. In Resend, create a sending API key and verify a sender domain you control through its DNS records. A GitHub-owned `github.io` domain cannot be verified as your sender domain. Resend's onboarding sender is for restricted account testing, not arbitrary production recipients. Until verification completes, configure only your Resend account email as the recipient. After verification, `HOST_EMAIL` can include both hosts separated by a comma. Guest input never controls the recipients, sender or subject.
 5. Set secrets using Wrangler's interactive prompts (no secret values in command history):
 
    ```sh

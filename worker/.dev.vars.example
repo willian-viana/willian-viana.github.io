@@ -3,4 +3,5 @@ TURNSTILE_SECRET_KEY="1x0000000000000000000000000000000AA"
 # Supply your own Resend key to test email; never commit it.
 RESEND_API_KEY=""
 RESEND_FROM=""
+# One address, or multiple addresses separated by commas.
 HOST_EMAIL=""

@@ -146,7 +146,8 @@ export default {
         return json({ ok: true, id }, 201);
       }
       const message = text(body.message, submissionLimits.message, 'Seu recado');
-      if (!env.RESEND_API_KEY || !env.RESEND_FROM || !env.HOST_EMAIL) {
+      const recipients = (env.HOST_EMAIL || '').split(',').map(email => email.trim());
+      if (!env.RESEND_API_KEY || !env.RESEND_FROM || recipients.some(email => !/^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/.test(email))) {
         throw new HttpError(503, 'NOT_CONFIGURED', 'O envio de recados está indisponível.');
       }
       await verifyTurnstile(token, 'message', origin, request, env);
@@ -155,7 +156,7 @@ export default {
           method: 'POST',
           headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            from: env.RESEND_FROM, to: [env.HOST_EMAIL],
+            from: env.RESEND_FROM, to: recipients,
             subject: 'Novo recado — República da Brisinha',
             text: `De: ${name}\n\n${message}`,
           }),

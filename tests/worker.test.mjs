@@ -177,6 +177,24 @@ test('invalid or unconfigured messages never contact providers', async t => {
   assert.equal(calls.length, 0);
 });
 
+test('messages reach both configured hosts and ignore guest-supplied recipients', async t => {
+  const { send, env, calls } = setup(t);
+  calls.expectedAction = 'message';
+  env.HOST_EMAIL = ' host@example.com, cohost@example.com ';
+  const response = await send('/api/message', { ...validMessage, to: ['someone-else@example.com'] });
+  assert.equal(response.status, 200);
+  assert.deepEqual(JSON.parse(calls[1].options.body).to, ['host@example.com', 'cohost@example.com']);
+});
+
+test('empty or invalid recipient configuration fails before contacting providers', async t => {
+  const { send, env, calls } = setup(t);
+  for (const recipients of ['', ' ', 'host@example.com,', 'not-an-email', 'host@example.com,invalid']) {
+    env.HOST_EMAIL = recipients;
+    assert.equal((await send('/api/message', validMessage)).status, 503);
+  }
+  assert.equal(calls.length, 0);
+});
+
 for (const emailStatus of [429, 500]) {
   test(`Resend ${emailStatus} never produces false success or leaks provider errors`, async t => {
     const { send, calls } = setup(t, { emailStatus, emailBody: { message: 'private diagnostic' } });
