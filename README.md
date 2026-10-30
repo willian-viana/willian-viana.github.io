@@ -42,7 +42,7 @@ pnpm preview
 
 All `VITE_*` values are public build-time configuration. Never put secrets in them. `.env.local`, `.dev.vars*`, `.wrangler`, `dist` and `.worker-build` are ignored; only sanitized examples are committed.
 
-The production Worker is at `https://republica-da-brisinha-api.republica-da-brisinha.workers.dev`. Its D1 binding and the frontend API URL are configured. Turnstile is configured for the current GitHub Pages hostname. Both migrations are applied and the deployed Worker stores RSVPs and messages in their respective tables.
+The production Worker is at `https://republica-da-brisinha-api.republica-da-brisinha.workers.dev`. Its D1 binding and the frontend API URL are configured. The API allows both `https://willian-viana.github.io` and the live frontend origin `https://republicadabrisinha.com.br`. Turnstile's allowed hostnames must also include each frontend hostname. Both migrations are applied and the deployed Worker stores RSVPs and messages in their respective tables.
 
 For an initial setup on another account, create a D1 database with `pnpm exec wrangler d1 create brisinha-rsvps --config worker/wrangler.toml`, then update the production database ID in that file. Keep the local binding separate.
 

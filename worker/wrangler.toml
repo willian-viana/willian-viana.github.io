@@ -5,7 +5,7 @@ workers_dev = true
 
 [vars]
 ENVIRONMENT = "production"
-ALLOWED_ORIGINS = "https://willian-viana.github.io"
+ALLOWED_ORIGINS = "https://willian-viana.github.io,https://republicadabrisinha.com.br"
 
 [[d1_databases]]
 binding = "DB"
