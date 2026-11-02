@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 const catalog=JSON.parse(readFileSync(new URL('../src/entities/gift/catalog.json',import.meta.url)));
-test('complete local catalog with safe payment links',()=>{assert.equal(catalog.items.length,40);assert.equal(new Set(catalog.items.map(x=>x.id)).size,40);for(const item of catalog.items){assert.ok(item.name.trim());assert.ok(Number.isInteger(item.priceCents)&&item.priceCents>0);assert.ok(existsSync(`public${item.photoUrl}`));assert.ok(!item.paymentUrl||new URL(item.paymentUrl).protocol==='https:');}});
+test('complete local catalog with safe payment links',()=>{assert.equal(catalog.items.length,41);assert.equal(new Set(catalog.items.map(x=>x.id)).size,41);for(const item of catalog.items){assert.ok(item.name.trim());assert.ok(Number.isInteger(item.priceCents)&&item.priceCents>0);assert.ok(existsSync(`public${item.photoUrl}`));assert.ok(!item.paymentUrl||new URL(item.paymentUrl).protocol==='https:');}});
 
 const english = JSON.parse(readFileSync(new URL('../src/entities/gift/catalog.en.json', import.meta.url)));
 
@@ -12,6 +12,8 @@ test('new gifts have both locales and sourced descriptions', () => {
     'electrolux-efp500', 'electrolux-eib20', 'electrolux-esg20', 'electrolux-ecp10',
     'tramontina-professional-62633207', 'tramontina-solar-62135247',
     'tokstok-hush-435952', 'tramontina-utilita-25685180',
+    'acasa-cachepot-galinha-5548372',
+    'linlight-utensilios-b0fvsz2jvr',
   ];
   assert.equal(english.length, catalog.items.length);
   assert.equal(new Set(english.map(item => item.id)).size, english.length);

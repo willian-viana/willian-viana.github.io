@@ -525,24 +525,6 @@
       "paymentUrl": null
     },
     {
-      "id": "a7304530-79c1-41ad-add5-670264bd03d7",
-      "name": "Testador de Boulos | Casalingo",
-      "description": null,
-      "photoUrl": "/gifts/a7304530-79c1-41ad-add5-670264bd03d7.webp",
-      "itemType": "gift",
-      "priceCents": 2500,
-      "acceptsFreeAmount": false,
-      "externalUrl": null,
-      "isAdult": false,
-      "status": "available",
-      "targetAmountCents": null,
-      "raisedAmountCents": 2599,
-      "lock": null,
-      "remaining": 3,
-      "sourceImageUrl": "https://sfozlsmtafhzbdsxvgrx.supabase.co/storage/v1/object/public/item-photos/items/6b0803e5-5302-4924-a57d-8abc82327603/390d2a43-589b-4977-b6e0-b7453a0427c6.webp",
-      "paymentUrl": null
-    },
-    {
       "id": "tramontina-century-24086108",
       "name": "Faca Chef Tramontina Century com Lâmina em Aço Inox e Cabo em Policarbonato e Fibra de Vidro 8\"",
       "description": "Faca chef de 8 polegadas com lâmina de aço inox forjado e cabo de policarbonato com fibra de vidro. A meia guarnição facilita o manuseio e permite afiar toda a lâmina. Pode ir à lava-louças.",
@@ -738,6 +720,42 @@
       "lock": null,
       "remaining": null,
       "sourceImageUrl": "https://assets.tramontina.com.br/upload/tramon/imagens/CUT/25685180PDM001G.jpg",
+      "paymentUrl": null
+    },
+    {
+      "id": "acasa-cachepot-galinha-5548372",
+      "name": "Cachepot Galinha Cerâmica - A\\CASA",
+      "description": "Cachepot de cerâmica com estampa de galinhas em vermelho sobre fundo claro. Ideal para acomodar plantas, flores e pequenos arranjos, adicionando um toque acolhedor a cozinhas, varandas, salas e áreas gourmet. O visual combina com estilos campestre e farmhouse.",
+      "photoUrl": "/gifts/acasa-cachepot-galinha-5548372.jpg",
+      "itemType": "gift",
+      "priceCents": 5990,
+      "acceptsFreeAmount": false,
+      "externalUrl": "https://www.angeloni.com.br/eletro/5548372-cachepot-galinha-ceramica-a-casa/p",
+      "isAdult": false,
+      "status": "available",
+      "targetAmountCents": null,
+      "raisedAmountCents": 0,
+      "lock": null,
+      "remaining": null,
+      "sourceImageUrl": "https://eletroangeloni.vtexassets.com/arquivos/ids/4786319/5548372.jpg?v=639263059238200000",
+      "paymentUrl": null
+    },
+    {
+      "id": "linlight-utensilios-b0fvsz2jvr",
+      "name": "Kit 8 Colher de Pau Jogo de Utensílios Madeira Premium — Linlight",
+      "description": "Conjunto de oito utensílios de cozinha em madeira de acácia, com colheres e espátulas. A superfície lisa ajuda a evitar riscos em panelas antiaderentes. Limpar com água e detergente e evitar lava-louças.",
+      "photoUrl": "/gifts/linlight-utensilios-b0fvsz2jvr.jpg",
+      "itemType": "gift",
+      "priceCents": 19900,
+      "acceptsFreeAmount": false,
+      "externalUrl": "https://www.amazon.com.br/dp/B0FVSZ2JVR?smid=A27SCJ6ZOIK5NP",
+      "isAdult": false,
+      "status": "available",
+      "targetAmountCents": null,
+      "raisedAmountCents": 0,
+      "lock": null,
+      "remaining": null,
+      "sourceImageUrl": "https://m.media-amazon.com/images/I/81PiIaRmCrL._AC_SL1500_.jpg",
       "paymentUrl": null
     }
   ]

@@ -196,13 +196,6 @@
     "paymentUrl": null
   },
   {
-    "id": "a7304530-79c1-41ad-add5-670264bd03d7",
-    "name": "Cake tester — Casalingo (Testador de Boulos)",
-    "description": null,
-    "priceCents": 521,
-    "paymentUrl": null
-  },
-  {
     "id": "tramontina-century-24086108",
     "name": "Tramontina Century chef’s knife — 8-inch stainless-steel blade",
     "description": "An 8-inch chef’s knife with a forged stainless-steel blade and a polycarbonate and fiberglass handle. The half bolster makes handling easier and allows the entire blade to be sharpened. Dishwasher safe.",
@@ -277,6 +270,20 @@
     "name": "Tramontina Utilità stainless-steel grater — white handle",
     "description": "A grater with a stainless-steel blade, polypropylene handle and protective cover, and a non-slip rubber base. The handle has a hanging hole. Dishwasher safe.",
     "priceCents": 2188,
+    "paymentUrl": null
+  },
+  {
+    "id": "acasa-cachepot-galinha-5548372",
+    "name": "A\\CASA ceramic planter with chicken pattern",
+    "description": "A ceramic planter with a red chicken pattern on a light background. Ideal for holding plants, flowers and small arrangements, adding a cozy touch to kitchens, verandas, living rooms and entertaining areas. Its look complements country and farmhouse styles.",
+    "priceCents": 1248,
+    "paymentUrl": null
+  },
+  {
+    "id": "linlight-utensilios-b0fvsz2jvr",
+    "name": "Linlight acacia-wood kitchen utensil set — 8 pieces",
+    "description": "A set of eight acacia-wood kitchen utensils, including spoons and spatulas. The smooth surface helps prevent scratches on nonstick cookware. Clean with water and dish soap, and avoid using a dishwasher.",
+    "priceCents": 4146,
     "paymentUrl": null
   }
 ]
