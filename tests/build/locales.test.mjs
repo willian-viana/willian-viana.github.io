@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const result = spawnSync('pnpm', ['exec', 'vite', 'build', '--ssr', 'tests/fixtures/render-locales.tsx', '--outDir', '.test-build', '--logLevel', 'warn'], { encoding: 'utf8' });
 assert.equal(result.status, 0, result.stdout + result.stderr);
@@ -24,7 +26,8 @@ test('Portuguese retains the original welcome, attendance and original BRL catal
 
 test('English has independent placeholder content and no attendance UI or event logistics', () => {
   const html = renderPage('en');
-  assert.ok(html.includes(content.welcomeMessage || 'English welcome message coming soon.'));
+  const welcome = renderToStaticMarkup(createElement('p', { className: 'welcome-message' }, content.welcomeMessage || 'English welcome message coming soon.'));
+  assert.ok(html.includes(welcome));
   for (const forbidden of ['#presenca', 'Confirmar presença', 'Presença', 'Você vem?', 'companions', original.event.location, original.event.welcomeMessage]) {
     assert.ok(!html.includes(forbidden), forbidden);
   }
