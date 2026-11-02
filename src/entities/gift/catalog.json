@@ -757,6 +757,24 @@
       "remaining": null,
       "sourceImageUrl": "https://m.media-amazon.com/images/I/81PiIaRmCrL._AC_SL1500_.jpg",
       "paymentUrl": null
+    },
+    {
+      "id": "zara-home-pepper-mill-48221558",
+      "name": "Moedor de Pimenta de Madeira com Tampa de Aço — Zara Home",
+      "description": "Moedor de pimenta com base de madeira, tampa de aço e mecanismo de moagem em aço. Mede 9,8 cm de altura, 8,6 cm de largura e 5,8 cm de profundidade.",
+      "photoUrl": "/gifts/zara-home-pepper-mill-48221558.webp",
+      "itemType": "gift",
+      "priceCents": 14990,
+      "acceptsFreeAmount": false,
+      "externalUrl": "https://www.zarahome.com/br/moedor-de-pimenta-de-madeira-com-tampa-de-aco-l48221558",
+      "isAdult": false,
+      "status": "available",
+      "targetAmountCents": null,
+      "raisedAmountCents": 0,
+      "lock": null,
+      "remaining": null,
+      "sourceImageUrl": "https://static.zarahome.net//assets/public/0d84/72f6/d0f649a2a7b0/671e2cd5c923/48221558052-a7/48221558052-a7.jpg?ts=1776085641766&f=auto&w=768&f=auto",
+      "paymentUrl": null
     }
   ]
 }
