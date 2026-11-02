@@ -6,7 +6,7 @@ test('complete local catalog with safe payment links',()=>{assert.equal(catalog.
 
 const english = JSON.parse(readFileSync(new URL('../src/entities/gift/catalog.en.json', import.meta.url)));
 
-test('new gifts have both locales, factual descriptions and USD prices at BRL 5.44', () => {
+test('new gifts have both locales and sourced descriptions', () => {
   const ids = [
     'tramontina-century-24086108', 'electrolux-ekm40', 'electrolux-bse20',
     'electrolux-efp500', 'electrolux-eib20', 'electrolux-esg20', 'electrolux-ecp10',
@@ -23,10 +23,17 @@ test('new gifts have both locales, factual descriptions and USD prices at BRL 5.
     assert.ok(pt.description.trim() && en.description.trim());
     assert.notEqual(en.name, pt.name);
     assert.notEqual(en.description, pt.description);
-    assert.equal(en.priceCents, Math.round(pt.priceCents * 100 / 544));
     assert.equal(pt.paymentUrl, null);
     assert.equal(en.paymentUrl, null);
     assert.equal(new URL(pt.sourceImageUrl).protocol, 'https:');
   }
   assert.equal(catalog.items.filter(item => item.externalUrl?.includes('eaf85-')).length, 1);
+});
+
+test('all international prices use BRL 4.80 per USD, rounded to cents', () => {
+  for (const en of english) {
+    const pt = catalog.items.find(item => item.id === en.id);
+    assert.ok(pt, en.id);
+    assert.equal(en.priceCents, Math.round(pt.priceCents * 100 / 480), en.id);
+  }
 });
