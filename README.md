@@ -113,6 +113,8 @@ Official references: [Turnstile validation](https://developers.cloudflare.com/tu
 
 ## Portuguese and English experiences
 
+The 11 catalog additions from November 2, 2026 use the current full purchase totals on their linked retailer pages, before cash/PIX discounts, excluding shipping and coupons (not crossed-out former prices). Their English prices were set once using **BRL ÷ 5.44**, rounded to USD cents; both catalogs remain independently editable with no runtime conversion. Titles, factual descriptions and local images come from each product's `externalUrl` and `sourceImageUrl`. The existing EAF85 air fryer was retained unchanged rather than duplicated. New payment links remain unset until provided.
+
 - `/pt/` preserves the original Portuguese content, RSVP, event information and BRL prices. Set Brazilian PIX/InfinitePay checkout links in each item's `paymentUrl` in `src/entities/gift/catalog.json`.
 - `/en/` is a separate gift-focused experience without RSVP, attendance controls, countdown or event logistics. Edit `src/entities/event/content.en.json` for the English welcome, description, subtitle and whether highlights/messages are shown. Its welcome remains an explicit placeholder until supplied.
 - English catalog entries live in `src/entities/gift/catalog.en.json`. Names, descriptions, **USD cents** and international checkout links are independent of Portuguese values. Keep IDs matched to the original catalog to reuse images; the English list can be reordered or shortened independently. Null prices and links display placeholders and cannot initiate payment. No currency conversion or fallback to Brazilian checkout links takes place.

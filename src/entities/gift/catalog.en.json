@@ -201,5 +201,82 @@
     "description": null,
     "priceCents": null,
     "paymentUrl": null
+  },
+  {
+    "id": "tramontina-century-24086108",
+    "name": "Tramontina Century chef’s knife — 8-inch stainless-steel blade",
+    "description": "An 8-inch chef’s knife with a forged stainless-steel blade and a polycarbonate and fiberglass handle. The half bolster makes handling easier and allows the entire blade to be sharpened. Dishwasher safe.",
+    "priceCents": 4669,
+    "paymentUrl": null
+  },
+  {
+    "id": "electrolux-ekm40",
+    "name": "Electrolux Experience stand mixer — 750 W, 5 L (EKM40)",
+    "description": "A gray 750 W planetary stand mixer with TruFlow technology and a 5 L stainless-steel bowl. Features soft start, 12 speeds and a pulse function. Includes three mixing attachments and a splash guard.",
+    "priceCents": 8454,
+    "paymentUrl": null
+  },
+  {
+    "id": "electrolux-bse20",
+    "name": "Electrolux Efficient Sport Blender — 320 W, two 600 ml bottles (BSE20)",
+    "description": "A 320 W personal blender with a stainless-steel finish, two speeds and a pulse function. Includes two 600 ml bottles with BPA-free lids, so you can blend and carry drinks in the same container.",
+    "priceCents": 4594,
+    "paymentUrl": null
+  },
+  {
+    "id": "electrolux-efp500",
+    "name": "Electrolux Efficient 3-in-1 food processor (EFP500)",
+    "description": "A 300 W food processor for chopping, slicing and grating. Features a BPA-free 710 ml bowl, two speeds and a pulse function. Includes a slicing and grating disc and a chopping blade.",
+    "priceCents": 5697,
+    "paymentUrl": null
+  },
+  {
+    "id": "electrolux-eib20",
+    "name": "Electrolux TruFlow 3-in-1 hand blender — 600 W (EIB20)",
+    "description": "A gray 600 W hand blender with a removable stainless-steel shaft, TruFlow technology and a turbo function. Includes a mini food processor, whisk and 600 ml beaker.",
+    "priceCents": 3675,
+    "paymentUrl": null
+  },
+  {
+    "id": "electrolux-esg20",
+    "name": "Electrolux Efficient nonstick sandwich maker (ESG20)",
+    "description": "A sandwich maker with brushed stainless-steel detailing and two fast-heating nonstick plates. Features indicator lights, an insulated handle, non-slip feet and cord storage. Can be stored upright.",
+    "priceCents": 2204,
+    "paymentUrl": null
+  },
+  {
+    "id": "electrolux-ecp10",
+    "name": "Electrolux Efficient citrus juicer — 800 ml (ECP10)",
+    "description": "A citrus juicer with an 800 ml jug and a 30 W motor. Features two cones for different fruit sizes, an adjustable pulp strainer and alternating rotation. The accessories are dishwasher safe.",
+    "priceCents": 2572,
+    "paymentUrl": null
+  },
+  {
+    "id": "tramontina-professional-62633207",
+    "name": "Tramontina Professional nonstick stainless-steel frying pan — 20 cm, 1.1 L",
+    "description": "A shallow stainless-steel frying pan measuring 20 cm in diameter with a 1.1 L capacity. Features a Starflon Premium nonstick interior and a stainless-steel, aluminum and stainless-steel base for even heat distribution.",
+    "priceCents": 6883,
+    "paymentUrl": null
+  },
+  {
+    "id": "tramontina-solar-62135247",
+    "name": "Tramontina Solar Silicone nonstick frying pan — 24 cm, 2.1 L",
+    "description": "A shallow 24 cm stainless-steel frying pan with a 2.1 L capacity, triple-layer base and Starflon Premium nonstick interior. Features a heat-resistant silicone-covered handle. Suitable for gas, electric, ceramic and induction cooktops. Dishwasher safe.",
+    "priceCents": 6985,
+    "paymentUrl": null
+  },
+  {
+    "id": "tokstok-hush-435952",
+    "name": "Tok&Stok Hush garlic press — zinc/gray",
+    "description": "A Hush garlic press made of zinc with ABS details. Measures 17.2 cm high, 3.5 cm wide and 4.5 cm deep.",
+    "priceCents": 881,
+    "paymentUrl": null
+  },
+  {
+    "id": "tramontina-utilita-25685180",
+    "name": "Tramontina Utilità stainless-steel grater — white handle",
+    "description": "A grater with a stainless-steel blade, polypropylene handle and protective cover, and a non-slip rubber base. The handle has a hanging hole. Dishwasher safe.",
+    "priceCents": 1930,
+    "paymentUrl": null
   }
 ]
