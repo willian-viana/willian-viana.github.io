@@ -24,7 +24,7 @@ export const copy = {
     welcomeLabel: 'Welcome', giftNote: 'These gifts are symbolic. Contributions go directly to the hosts.',
     messagesDescription: 'Leave a message for the hosts.',
     details: 'View details', give: 'Give this gift', close: 'Close details',
-    giftDescription: 'English product description coming soon.',
+    giftDescription: '',
     paymentNote: 'This is a symbolic gift. Payment takes place on an external service, directly to the hosts.',
     pay: 'Continue to payment', paymentPending: 'International payment link coming soon', pricePending: 'USD price coming soon',
     name: 'Your name', message: 'Your message', unavailable: 'Submissions are currently unavailable. Please check back soon.',
