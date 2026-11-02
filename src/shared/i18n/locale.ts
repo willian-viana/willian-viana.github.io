@@ -1,10 +1,8 @@
 export type Locale = 'pt' | 'en';
-export const localePreferenceKey = 'brisinha.locale';
 
-export function resolveLocale(pathname: string, preference: string | null, regionLocale: Locale = 'pt'): Locale {
+export function resolveLocale(pathname: string, regionLocale: Locale = 'pt'): Locale {
   const explicit = pathname.match(/^\/(pt|en)\/?$/)?.[1];
   if (explicit === 'pt' || explicit === 'en') return explicit;
-  if (preference === 'pt' || preference === 'en') return preference;
   return regionLocale;
 }
 

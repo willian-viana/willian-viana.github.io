@@ -6,7 +6,6 @@ import { GiftCard } from '../../features/give-gift/GiftCard';
 import { Form } from '../../features/respond/Form';
 import { Button } from '../../shared/ui/button';
 import { Icon } from '../../shared/ui/icon';
-import { LanguageSwitcher } from '../../features/switch-language/LanguageSwitcher';
 import { giftCatalog } from '../../entities/gift/model';
 import englishContent from '../../entities/event/content.en.json';
 import { copy } from '../../shared/i18n/copy';
@@ -61,7 +60,6 @@ export function Home({ locale = 'pt' }: { locale?: Locale }) {
       </header>
       <div className="event-layout">
         <aside className="event-sidebar" aria-label={c.about} ref={sidebar}>
-          <LanguageSwitcher locale={locale} hash={`#${section}`} />
           {!international && countdown && <p className="event-countdown"><span aria-hidden="true" />{countdown}</p>}
           <h1>{catalog.event.title}</h1>
           <p className="event-type">{international ? englishContent.subtitle : 'Chá de Panela'}</p>

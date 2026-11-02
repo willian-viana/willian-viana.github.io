@@ -66,3 +66,11 @@ test('GitHub Pages contains real localized entrypoints that reference root asset
     assert.match(html, /src="\/assets\/[^\"]+\.js"/);
   }
 });
+
+test('neither locale renders language-switching pills or links', () => {
+  for (const locale of ['pt', 'en']) {
+    const html = renderPage(locale);
+    assert.ok(!html.includes('class="language-switcher"'));
+    assert.ok(!/href="\/(pt|en)\//.test(html));
+  }
+});

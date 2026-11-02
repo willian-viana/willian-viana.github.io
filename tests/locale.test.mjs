@@ -2,17 +2,17 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { detectLocale, resolveLocale, localePath } from '../src/shared/i18n/locale.ts';
 
-test('explicit locale URLs override saved preferences and IP-based locale', () => {
-  assert.equal(resolveLocale('/pt', 'en', 'en'), 'pt');
-  assert.equal(resolveLocale('/en/', 'pt', 'pt'), 'en');
+test('explicit locale URLs override IP-based locale', () => {
+  assert.equal(resolveLocale('/pt', 'en'), 'pt');
+  assert.equal(resolveLocale('/en/', 'pt'), 'en');
+  assert.equal(resolveLocale('/pt/', 'en'), 'pt');
+  assert.equal(resolveLocale('/en', 'pt'), 'en');
 });
 
-test('root uses a manual preference, then IP-based locale, defaulting to Portuguese', () => {
-  assert.equal(resolveLocale('/', 'pt', 'en'), 'pt');
-  assert.equal(resolveLocale('/', 'en', 'pt'), 'en');
-  assert.equal(resolveLocale('/', null, 'en'), 'en');
-  assert.equal(resolveLocale('/', 'invalid', 'pt'), 'pt');
-  assert.equal(resolveLocale('/', null), 'pt');
+test('root uses IP-based locale, defaulting to Portuguese', () => {
+  assert.equal(resolveLocale('/', 'en'), 'en');
+  assert.equal(resolveLocale('/', 'pt'), 'pt');
+  assert.equal(resolveLocale('/'), 'pt');
 });
 
 test('IP lookup validates the response and never includes credentials or caches a visitor locale', async t => {
@@ -47,7 +47,7 @@ test('missing configuration, failed lookup, invalid JSON and timeout default to 
   assert.equal(await detectLocale('https://api.example.com'), 'pt');
 });
 
-test('language switching preserves shared sections but never targets English attendance', () => {
+test('locale URLs preserve shared sections but never target English attendance', () => {
   assert.equal(localePath('en', '#presentes'), '/en/#presentes');
   assert.equal(localePath('en', '#presenca'), '/en/#inicio');
   assert.equal(localePath('pt', '#presenca'), '/pt/#presenca');
