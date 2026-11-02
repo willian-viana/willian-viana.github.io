@@ -107,20 +107,26 @@ export default {
       }
       headers.set('Access-Control-Allow-Origin', origin);
       const path = new URL(request.url).pathname;
-      if (path !== '/api/rsvp' && path !== '/api/message') throw new HttpError(404, 'NOT_FOUND', 'Recurso não encontrado.');
+      if (path !== '/api/rsvp' && path !== '/api/message' && path !== '/api/locale') throw new HttpError(404, 'NOT_FOUND', 'Recurso não encontrado.');
+      const allowedMethod = path === '/api/locale' ? 'GET' : 'POST';
       if (request.method === 'OPTIONS') {
         const method = request.headers.get('Access-Control-Request-Method');
         const requestedHeaders = (request.headers.get('Access-Control-Request-Headers') || '').split(',').filter(Boolean);
-        if (method !== 'POST' || requestedHeaders.some(value => value.trim().toLowerCase() !== 'content-type')) {
+        if (method !== allowedMethod || requestedHeaders.some(value => allowedMethod === 'GET' || value.trim().toLowerCase() !== 'content-type')) {
           throw new HttpError(403, 'PREFLIGHT_NOT_ALLOWED', 'Requisição não permitida.');
         }
-        headers.set('Access-Control-Allow-Methods', 'POST');
-        headers.set('Access-Control-Allow-Headers', 'Content-Type');
+        headers.set('Access-Control-Allow-Methods', allowedMethod);
+        if (allowedMethod === 'POST') headers.set('Access-Control-Allow-Headers', 'Content-Type');
         return new Response(null, { status: 204, headers });
       }
-      if (request.method !== 'POST') {
-        headers.set('Allow', 'POST, OPTIONS');
+      if (request.method !== allowedMethod) {
+        headers.set('Allow', `${allowedMethod}, OPTIONS`);
         throw new HttpError(405, 'METHOD_NOT_ALLOWED', 'Método não permitido.');
+      }
+      if (path === '/api/locale') {
+        const country = request.cf?.country;
+        const abroad = typeof country === 'string' && /^[A-Z]{2}$/.test(country) && country !== 'BR' && country !== 'XX';
+        return json({ locale: abroad ? 'en' : 'pt' }, 200);
       }
       const body = await readBody(request);
       const name = text(body.name, submissionLimits.name, 'Seu nome');

@@ -216,3 +216,40 @@ for (const verify of [null, { success: 'true' }, { success: false, 'error-codes'
     assert.equal(db.prepare('SELECT count(*) AS n FROM rsvps').get().n, 0);
   });
 }
+
+for (const [country, locale] of [['BR', 'pt'], ['US', 'en'], ['PT', 'en'], ['DE', 'en'], [undefined, 'pt'], [null, 'pt'], ['', 'pt'], ['XX', 'pt'], ['T1', 'pt'], ['invalid', 'pt']]) {
+  test(`IP locale for ${country} is ${locale}, without storage or external requests`, async t => {
+    const { env, calls } = setup(t);
+    env.DB.prepare = () => { throw Error('Locale lookup must not access D1'); };
+    const request = new Request('https://api.example.com/api/locale', {
+      headers: { Origin: origin, 'CF-IPCountry': 'US', 'Accept-Language': 'pt-BR' },
+    });
+    // Simulate trusted Cloudflare metadata, not client-controlled headers.
+    if (country !== undefined) Object.defineProperty(request, 'cf', { value: { country } });
+    const response = await worker.fetch(request, env);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { locale });
+    assert.equal(response.headers.get('Access-Control-Allow-Origin'), origin);
+    assert.equal(response.headers.get('Cache-Control'), 'no-store');
+    assert.equal(response.headers.get('Vary'), 'Origin');
+    assert.equal(calls.length, 0);
+  });
+}
+
+test('locale endpoint restricts origins, methods and preflight without changing form CORS', async t => {
+  const { env, calls } = setup(t);
+  const send = (method, headers = {}) => worker.fetch(new Request('https://api.example.com/api/locale', {
+    method, headers: { Origin: origin, ...headers },
+  }), env);
+  assert.equal((await send('GET', { Origin: 'https://elsewhere.example' })).status, 403);
+  assert.equal((await send('GET', { Origin: '' })).status, 403);
+  const post = await send('POST');
+  assert.equal(post.status, 405);
+  assert.equal(post.headers.get('Allow'), 'GET, OPTIONS');
+  const preflight = await send('OPTIONS', { 'Access-Control-Request-Method': 'GET' });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get('Access-Control-Allow-Methods'), 'GET');
+  assert.equal((await send('OPTIONS', { 'Access-Control-Request-Method': 'POST' })).status, 403);
+  assert.equal((await send('OPTIONS', { 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'Authorization' })).status, 403);
+  assert.equal(calls.length, 0);
+});
