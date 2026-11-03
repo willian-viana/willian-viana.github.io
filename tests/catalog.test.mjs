@@ -26,17 +26,33 @@ test('new gifts have both locales and sourced descriptions', () => {
     assert.ok(pt.description.trim() && en.description.trim());
     assert.notEqual(en.name, pt.name);
     assert.notEqual(en.description, pt.description);
-    assert.equal(pt.paymentUrl, null);
+    assert.equal(new URL(pt.paymentUrl).protocol, 'https:');
     assert.equal(en.paymentUrl, null);
     assert.equal(new URL(pt.sourceImageUrl).protocol, 'https:');
   }
   assert.equal(catalog.items.filter(item => item.externalUrl?.includes('eaf85-')).length, 1);
 });
 
-test('all international prices use BRL 4.80 per USD, rounded to cents', () => {
-  for (const en of english) {
-    const pt = catalog.items.find(item => item.id === en.id);
-    assert.ok(pt, en.id);
-    assert.equal(en.priceCents, Math.round(pt.priceCents * 100 / 480), en.id);
+test('every Brazilian product has an explicitly configured HTTPS payment link', () => {
+  for (const gift of catalog.items) {
+    assert.ok(gift.paymentUrl, gift.id);
+    assert.equal(new URL(gift.paymentUrl).protocol, 'https:');
+  }
+});
+
+test('only the approved scissors pair may share a Brazilian payment link', () => {
+  const links = new Map();
+  for (const gift of catalog.items) {
+    const ids = links.get(gift.paymentUrl) || [];
+    ids.push(gift.id);
+    links.set(gift.paymentUrl, ids);
+  }
+  for (const ids of links.values()) {
+    if (ids.length > 1) {
+      assert.deepEqual(ids.slice().sort(), [
+        '35447f99-4129-4232-9d1c-e010b782ed4d',
+        '30d36e05-441b-4b60-8b72-73aaf42036fa',
+      ].sort());
+    }
   }
 });

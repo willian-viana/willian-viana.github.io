@@ -77,3 +77,28 @@ test('neither locale renders language-switching pills or links', () => {
     assert.ok(!/href="\/(pt|en)\//.test(html));
   }
 });
+
+test('Brazilian Presentear links use each configured checkout in a new tab', () => {
+  for (const gift of giftCatalog('pt')) {
+    const html = renderCard(gift, 'pt');
+    const link = html.match(/<a\b[^>]*>Presentear<\/a>/)?.[0];
+    assert.ok(link, gift.id);
+    assert.ok(link.includes(`href="${gift.paymentUrl}"`), gift.id);
+    assert.ok(link.includes('target="_blank"'), gift.id);
+    assert.ok(link.includes('rel="noopener noreferrer"'), gift.id);
+    assert.match(html, /<button[^>]*aria-label="Ver detalhes:/);
+  }
+});
+
+test('English gift actions keep opening details and never use Brazilian checkout links', () => {
+  for (const gift of giftCatalog('en')) {
+    const html = renderCard(gift, 'en');
+    assert.ok(!html.includes('https://mpago.la/'), gift.id);
+    assert.ok(!/<a\b[^>]*>Give this gift<\/a>/.test(html), gift.id);
+    assert.match(html, /<button[^>]*aria-label="Give this gift:/);
+  }
+  const pt = giftCatalog('pt')[0];
+  const pending = renderCard({ ...pt, paymentUrl: null }, 'pt');
+  assert.ok(!/<a\b[^>]*>Presentear<\/a>/.test(pending));
+  assert.match(pending, /<button[^>]*aria-label="Presentear:/);
+});

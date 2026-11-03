@@ -21,9 +21,13 @@ export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale 
           <h3 title={gift.name}>{gift.name}</h3>
           <p className="gift-price">{price}</p>
           <div className="gift-action">
-            <Dialog.Trigger asChild>
+            {locale === 'pt' && gift.paymentUrl && gift.priceCents !== null ? (
+              <Button variant="secondary" asChild>
+                <a href={gift.paymentUrl} target="_blank" rel="noopener noreferrer" aria-label={`${c.give}: ${gift.name}`}>{c.give}</a>
+              </Button>
+            ) : <Dialog.Trigger asChild>
               <Button variant="secondary" aria-label={`${c.give}: ${gift.name}`}>{c.give}</Button>
-            </Dialog.Trigger>
+            </Dialog.Trigger>}
           </div>
         </div>
         <Dialog.Portal>
