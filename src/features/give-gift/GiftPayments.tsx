@@ -32,13 +32,20 @@ const labels = {
   },
 };
 
+export async function copyPaymentLink(url: string) {
+  const copying = navigator.clipboard.writeText(url);
+  // Open during the click, before awaiting clipboard access, to preserve the user gesture.
+  window.open(url, '_blank', 'noopener,noreferrer');
+  await copying;
+}
+
 export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
   const c = labels[locale];
   const methods = locale === 'en' ? internationalMethods : [
     ...(gift.paymentUrl && gift.priceCents !== null ? [{
       id: 'mercado-pago', name: 'Mercado Pago',
       description: 'Se o Mercado Pago tentar abrir o aplicativo ou fechar a página, copie o link de pagamento e cole diretamente no navegador do seu celular.',
-      url: gift.paymentUrl, value: gift.paymentUrl, copyLabel: 'Copiar link de pagamento',
+      url: gift.paymentUrl, value: gift.paymentUrl, copyLabel: 'Copiar e abrir link',
     }] : []),
     { ...internationalMethods[1], description: 'Use nossa Wisetag para enviar o valor que quiser.', copyLabel: 'Copiar Wisetag' },
   ];
@@ -49,7 +56,8 @@ export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
     setCopied(null);
     setCopyError(null);
     try {
-      await navigator.clipboard.writeText(value);
+      if (id === 'mercado-pago') await copyPaymentLink(value);
+      else await navigator.clipboard.writeText(value);
       setCopied(id);
     } catch {
       setCopyError(id);

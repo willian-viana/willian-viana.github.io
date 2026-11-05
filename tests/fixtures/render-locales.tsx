@@ -13,3 +13,4 @@ export function renderForm(locale: Locale, rsvp: boolean) { return renderToStati
 export function renderGallery(locale: Locale) { return renderToStaticMarkup(<FamilyGallery locale={locale} />); }
 export function renderPayments(gift: Gift, locale: Locale) { return renderToStaticMarkup(<GiftPayments gift={gift} locale={locale} />); }
 export { giftCatalog, giftPrice };
+export { copyPaymentLink } from '../../src/features/give-gift/GiftPayments';

@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 const result = spawnSync('pnpm', ['exec', 'vite', 'build', '--ssr', 'tests/fixtures/render-locales.tsx', '--outDir', '.test-build', '--logLevel', 'warn'], { encoding: 'utf8' });
 assert.equal(result.status, 0, result.stdout + result.stderr);
-const { renderPage, renderCard, renderForm, renderGallery, renderPayments, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
+const { renderPage, renderCard, renderForm, renderGallery, renderPayments, copyPaymentLink, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
 const original = JSON.parse(readFileSync('src/entities/gift/catalog.json', 'utf8'));
 const english = JSON.parse(readFileSync('src/entities/gift/catalog.en.json', 'utf8'));
 const content = JSON.parse(readFileSync('src/entities/event/content.en.json', 'utf8'));
@@ -107,12 +107,39 @@ test('Brazilian Presentear opens options with the product checkout, copy action 
     assert.ok(link.includes('target="_blank"'), gift.id);
     assert.ok(link.includes('rel="noopener noreferrer"'), gift.id);
     assert.ok(payments.includes(`<p class="payment-detail">${gift.paymentUrl}</p>`), gift.id);
-    assert.ok(payments.includes('Copiar link de pagamento'), gift.id);
+    assert.ok(payments.includes('Copiar e abrir link'), gift.id);
     assert.ok(payments.includes('Se o Mercado Pago tentar abrir o aplicativo ou fechar a página, copie o link de pagamento e cole diretamente no navegador do seu celular.'), gift.id);
     assert.ok(payments.includes('https://wise.com/pay/me/willianb67'));
     assert.ok(payments.includes('Copiar Wisetag'));
     assert.ok(!payments.includes('paypal.com'));
     assert.ok(!payments.includes('QR code'));
+  }
+});
+
+test('copying a payment link opens its secure new tab before clipboard completion and preserves failures', async () => {
+  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
+  const url = giftCatalog('pt')[0].paymentUrl;
+  let resolveCopy;
+  let clipboard = new Promise(resolve => { resolveCopy = resolve; });
+  const copies = [];
+  const opened = [];
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { clipboard: { writeText: value => { copies.push(value); return clipboard; } } } });
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: { open: (...args) => { opened.push(args); return null; } } });
+  try {
+    const pending = copyPaymentLink(url);
+    assert.deepEqual(copies, [url]);
+    assert.deepEqual(opened, [[url, '_blank', 'noopener,noreferrer']]);
+    resolveCopy();
+    await pending;
+    clipboard = Promise.reject(new Error('Clipboard denied'));
+    await assert.rejects(copyPaymentLink(url), /Clipboard denied/);
+    assert.equal(opened.length, 2);
+  } finally {
+    if (navigatorDescriptor) Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
+    else delete globalThis.navigator;
+    if (windowDescriptor) Object.defineProperty(globalThis, 'window', windowDescriptor);
+    else delete globalThis.window;
   }
 });
 
