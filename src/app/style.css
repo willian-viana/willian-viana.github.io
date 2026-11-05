@@ -217,19 +217,19 @@ button, a { touch-action: manipulation; }
 .photo-dismiss { display: block; padding: 0; border: 0; background: transparent; }
 .photo-full { display: block; width: auto; height: auto; max-width: min(1100px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); border-radius: 16px; object-fit: contain; }
 
-.international-payments { margin-top: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 20px; }
-.international-payments h3 { display: flex; align-items: flex-start; gap: 10px; font-size: 16px; font-weight: 600; line-height: 24px; }
-.international-payments h3 svg { margin-top: 2px; }
+.gift-payments { margin-top: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 20px; }
+.gift-payments h3 { display: flex; align-items: flex-start; gap: 10px; font-size: 16px; font-weight: 600; line-height: 24px; }
+.gift-payments h3 svg { margin-top: 2px; }
 .payment-method { padding-top: 20px; }
 .payment-method+.payment-method { margin-top: 20px; border-top: 1px solid var(--border); }
 .payment-method-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .payment-method h4 { font-size: 16px; font-weight: 600; }
 .payment-method-heading>span { padding: 4px 8px; border-radius: 999px; background: #f7f4ef; color: var(--muted); font-size: 11px; }
-.international-payments .payment-description { margin-top: 8px; color: var(--muted); font-size: 14px; }
-.international-payments .payment-detail { margin-top: 8px; font-size: 14px; overflow-wrap: anywhere; user-select: text; }
+.gift-payments .payment-description { margin-top: 8px; color: var(--muted); font-size: 14px; }
+.gift-payments .payment-detail { margin-top: 8px; font-size: 14px; overflow-wrap: anywhere; user-select: text; }
 .payment-actions { display: grid; gap: 8px; margin-top: 12px; }
 .payment-actions .button { min-width: 0; min-height: 44px; padding: 10px 12px; font-size: 14px; }
-.international-payments .payment-copy-status { margin-top: 8px; font-size: 13px; color: var(--muted); }
+.gift-payments .payment-copy-status { margin-top: 8px; font-size: 13px; color: var(--muted); }
 .payment-copy-status:empty { display: none; }
 @media (min-width: 480px) {
   .payment-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }

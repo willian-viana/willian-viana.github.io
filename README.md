@@ -107,7 +107,7 @@ Storage is append-only. There is no identity-based deduplication or editing. Ret
 
 ## Static content
 
-Edit `src/entities/gift/catalog.json`; images live in `public/gifts`. Prices are integer BRL cents from the reference's base values, without its platform surcharge. Set each `paymentUrl` to that product’s dedicated HTTPS payment link payable directly to the hosts. The two scissors entries intentionally share one payment link. In Portuguese, “Presentear” opens this checkout in a new tab; clicking the product image still opens its details. No payment credentials are handled here.
+Edit `src/entities/gift/catalog.json`; images live in `public/gifts`. Prices are integer BRL cents from the reference's base values, without its platform surcharge. Set each `paymentUrl` to that product’s dedicated HTTPS payment link payable directly to the hosts. The two scissors entries intentionally share one payment link. In Portuguese, “Presentear” and the product image open the gift details with Mercado Pago and Wise options. Mercado Pago uses the product’s dedicated link, with buttons to open it in a new tab or copy it. The mobile disclaimer explains how to paste the link directly into a browser if the payment app interrupts navigation. No payment credentials are handled here.
 
 The catalog and welcome message were imported from https://www.listapresentear.com.br/lista/republica-da-brisinha on 2026-10-29. Katibeh and Zalando Sans are served locally with OFL licenses in `public/fonts`.
 
@@ -133,6 +133,6 @@ Both languages include the family gallery at `/pt/#fotos` and `/en/#fotos`. Orig
 The masonry layout uses `display: grid-lanes` when supported and CSS columns otherwise, with two columns on phones and three on wider screens. The popup reuses the existing Radix dialog for keyboard focus and modal behavior.
 
 
-## International contributions
+## Contribution options
 
-English gift dialogs offer PayPal and Wise with an amount chosen by the guest. `src/features/give-gift/InternationalPayments.tsx` contains the supplied public payment URLs, PayPal email and Wisetag. Each option opens the external service in a new tab and allows copying its recipient details. If clipboard access fails, the details remain visible for manual copying. Brazilian product checkout buttons continue to use their dedicated links.
+English gift dialogs offer PayPal and Wise with an amount chosen by the guest. Portuguese dialogs offer the product’s Mercado Pago checkout and Wise. `src/features/give-gift/GiftPayments.tsx` shares the layout, clipboard handling and supplied public PayPal/Wise details across both languages. Each option opens the external service in a new tab and allows copying its recipient details. If clipboard access fails, the details remain visible for manual copying. Brazilian Mercado Pago actions continue to use each product’s dedicated link from the catalog; prices and payment URLs are unchanged.

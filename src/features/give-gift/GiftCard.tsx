@@ -4,7 +4,7 @@ import { copy } from '../../shared/i18n/copy';
 import type { Locale } from '../../shared/i18n/locale';
 import { Button } from '../../shared/ui/button';
 import { Icon } from '../../shared/ui/icon';
-import { InternationalPayments } from './InternationalPayments';
+import { GiftPayments } from './GiftPayments';
 
 export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale }) {
   const c = copy[locale];
@@ -22,13 +22,9 @@ export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale 
           <h3 title={gift.name}>{gift.name}</h3>
           <p className="gift-price">{price}</p>
           <div className="gift-action">
-            {locale === 'pt' && gift.paymentUrl && gift.priceCents !== null ? (
-              <Button variant="secondary" asChild>
-                <a href={gift.paymentUrl} target="_blank" rel="noopener noreferrer" aria-label={`${c.give}: ${gift.name}`}>{c.give}</a>
-              </Button>
-            ) : <Dialog.Trigger asChild>
+            <Dialog.Trigger asChild>
               <Button variant="secondary" aria-label={`${c.give}: ${gift.name}`}>{c.give}</Button>
-            </Dialog.Trigger>}
+            </Dialog.Trigger>
           </div>
         </div>
         <Dialog.Portal>
@@ -40,8 +36,8 @@ export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale 
             <Dialog.Description>{gift.description || c.giftDescription}</Dialog.Description>
             <p className="gift-price">{price}</p>
             <p>{c.paymentNote}</p>
-            {locale === 'en' ? <InternationalPayments /> : gift.paymentUrl && gift.priceCents !== null ? (
-              <Button asChild><a href={gift.paymentUrl} target="_blank" rel="noopener noreferrer">{c.pay} <Icon name="arrow" /></a></Button>
+            {locale === 'en' || gift.paymentUrl && gift.priceCents !== null ? (
+              <GiftPayments gift={gift} locale={locale} />
             ) : <Button disabled>{gift.priceCents === null ? c.pricePending : c.paymentPending}</Button>}
           </Dialog.Content>
         </Dialog.Portal>
