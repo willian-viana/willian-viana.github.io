@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 const result = spawnSync('pnpm', ['exec', 'vite', 'build', '--ssr', 'tests/fixtures/render-locales.tsx', '--outDir', '.test-build', '--logLevel', 'warn'], { encoding: 'utf8' });
 assert.equal(result.status, 0, result.stdout + result.stderr);
-const { renderPage, renderCard, renderForm, renderGallery, renderPayments, renderPaymentPage, paymentPagePath, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
+const { renderPage, renderCard, renderForm, renderGallery, renderPayments, renderPaymentPage, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
 const original = JSON.parse(readFileSync('src/entities/gift/catalog.json', 'utf8'));
 const english = JSON.parse(readFileSync('src/entities/gift/catalog.en.json', 'utf8'));
 const content = JSON.parse(readFileSync('src/entities/event/content.en.json', 'utf8'));
@@ -95,45 +95,46 @@ test('both locales provide the family gallery with lazy previews and localized t
   }
 });
 
-test('Brazilian Presentar links go directly to each configured checkout in the same tab', () => {
+test('Portuguese Presentear opens the gift dialog without navigating or linking to the payment page', () => {
   for (const gift of giftCatalog('pt')) {
     const html = renderCard(gift, 'pt');
-    const links = [...html.matchAll(/<a\b[^>]*>Presentar<\/a>/g)];
-    assert.equal(links.length, 1, gift.id);
-    const link = links[0][0];
-    assert.ok(link.includes(`href="${gift.paymentUrl}"`), gift.id);
-    assert.ok(link.includes('target="_self"'), gift.id);
-    assert.ok(link.includes('rel="noopener noreferrer"'), gift.id);
+    const button = html.match(/<button\b[^>]*>Presentear<\/button>/)?.[0];
+    assert.ok(button, gift.id);
+    assert.ok(button.includes('aria-haspopup="dialog"'), gift.id);
+    assert.ok(!/<a\b[^>]*>Presentear<\/a>/.test(html), gift.id);
     assert.match(html, /<button[^>]*aria-label="Ver detalhes:/);
-    for (const text of ['/pt/pagamento/', 'Mercado Pago', 'wise.com', 'willianb67', 'Copiar link', 'payment-method']) {
-      assert.ok(!html.includes(text), `${gift.id}: ${text}`);
-    }
+    assert.ok(!html.includes('/pt/pagamento/'), gift.id);
+    assert.ok(!html.includes('target="_blank"'), gift.id);
+    assert.ok(!html.includes(gift.paymentUrl), gift.id);
   }
 });
 
-test('payment page continues in the current tab using only the selected catalog checkout', () => {
+test('Portuguese popup options and retained payment page use same-tab Mercado Pago and Wise links', () => {
   for (const gift of giftCatalog('pt')) {
-    const html = renderPaymentPage(gift.id);
-    const link = html.match(/<a\b[^>]*>Continuar no Mercado Pago[\s\S]*?<\/a>/)?.[0];
-    assert.ok(link, gift.id);
-    assert.ok(link.includes(`href="${gift.paymentUrl}"`), gift.id);
-    assert.ok(link.includes('target="_self"'), gift.id);
-    assert.ok(link.includes('rel="noopener noreferrer"'), gift.id);
-    assert.equal((html.match(/<h4>Mercado Pago<\/h4>/g) || []).length, 1);
-    assert.equal((html.match(/<h4>Wise<\/h4>/g) || []).length, 1);
-    assert.ok(html.indexOf('<h4>Mercado Pago</h4>') < html.indexOf('<h4>Wise</h4>'));
-    assert.equal((html.match(/class="payment-detail"/g) || []).length, 2);
-    assert.ok(html.includes('Copiar link<svg'));
-    assert.ok(html.includes('Copiar Wisetag'));
-    const wiseLink = html.match(/<a\b[^>]*>Abrir Wise[\s\S]*?<\/a>/)?.[0];
-    assert.ok(wiseLink.includes('href="https://wise.com/pay/me/willianb67"'));
-    assert.ok(wiseLink.includes('target="_blank"'));
-    assert.ok(wiseLink.includes('rel="noopener noreferrer"'));
-    assert.equal((html.match(/Se o Mercado Pago tentar abrir o aplicativo/g) || []).length, 1);
-    assert.ok(!html.includes('Copiar link sem abrir'));
-    assert.ok(!html.includes('Copiar e abrir link'));
-    assert.ok(!html.includes('paypal.com'));
-    assert.ok(!html.includes('<script'));
+    for (const html of [renderPayments(gift, 'pt'), renderPaymentPage(gift.id)]) {
+      const link = html.match(/<a\b[^>]*>Continuar no Mercado Pago[\s\S]*?<\/a>/)?.[0];
+      assert.ok(link, gift.id);
+      assert.ok(link.includes(`href="${gift.paymentUrl}"`), gift.id);
+      assert.ok(link.includes('target="_self"'), gift.id);
+      assert.ok(link.includes('rel="noopener noreferrer"'), gift.id);
+      assert.equal((html.match(/<h4>Mercado Pago<\/h4>/g) || []).length, 1);
+      assert.equal((html.match(/<h4>Wise<\/h4>/g) || []).length, 1);
+      assert.ok(html.indexOf('<h4>Mercado Pago</h4>') < html.indexOf('<h4>Wise</h4>'));
+      assert.equal((html.match(/class="payment-detail"/g) || []).length, 2);
+      assert.ok(html.includes('Copiar link<svg'));
+      assert.ok(html.includes('Copiar Wisetag'));
+      const wiseLink = html.match(/<a\b[^>]*>Abrir Wise[\s\S]*?<\/a>/)?.[0];
+      assert.ok(wiseLink.includes('href="https://wise.com/pay/me/willianb67"'));
+      assert.ok(wiseLink.includes('target="_self"'));
+      assert.ok(wiseLink.includes('rel="noopener noreferrer"'));
+      assert.equal((html.match(/Se o Mercado Pago tentar abrir o aplicativo/g) || []).length, 1);
+      assert.ok(!html.includes('Copiar link sem abrir'));
+      assert.ok(!html.includes('Copiar e abrir link'));
+      assert.ok(!html.includes('paypal.com'));
+      assert.ok(!html.includes('<script'));
+      assert.ok(!html.includes('target="_blank"'));
+      assert.ok(!html.includes('/pt/pagamento/'));
+    }
   }
   for (const id of [null, 'unknown', 'https://untrusted.example/payment', '<script>alert(1)</script>']) {
     const html = renderPaymentPage(id);
@@ -142,7 +143,6 @@ test('payment page continues in the current tab using only the selected catalog 
     assert.ok(!html.includes('Continuar no Mercado Pago'));
     assert.ok(!html.includes('untrusted.example'));
   }
-  assert.equal(paymentPagePath('a&presente=b'), '/pt/pagamento/?presente=a%26presente%3Db');
 });
 
 test('English gift actions keep opening details and never use Brazilian checkout links', () => {
@@ -154,8 +154,8 @@ test('English gift actions keep opening details and never use Brazilian checkout
   }
   const pt = giftCatalog('pt')[0];
   const pending = renderCard({ ...pt, paymentUrl: null }, 'pt');
-  assert.ok(!/<a\b[^>]*>Presentar<\/a>/.test(pending));
-  assert.match(pending, /<button[^>]*aria-label="Presentar:/);
+  assert.ok(!/<a\b[^>]*>Presentear<\/a>/.test(pending));
+  assert.match(pending, /<button[^>]*aria-label="Presentear:/);
 });
 
 test('international contributions use the supplied PayPal and Wise details', () => {

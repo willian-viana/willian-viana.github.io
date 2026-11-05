@@ -33,10 +33,6 @@ const labels = {
   },
 };
 
-export function paymentPagePath(giftId: string) {
-  return `${import.meta.env.BASE_URL}pt/pagamento/?presente=${encodeURIComponent(giftId)}`;
-}
-
 export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
   const c = labels[locale];
   const methods = locale === 'en' ? internationalMethods : [
@@ -71,8 +67,7 @@ export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
       <p className="payment-description">{method.description}</p>
       <p className="payment-detail">{method.value}</p>
       <div className="payment-actions">
-        {/* Mercado Pago continues in the already loaded payment tab to avoid another initial app-handoff navigation. */}
-        <Button asChild><a href={method.url} target={method.id === 'mercado-pago' ? '_self' : '_blank'} rel="noopener noreferrer">{method.id === 'mercado-pago' ? 'Continuar no Mercado Pago' : `${c.open} ${method.name}`}<Icon name="arrow" /></a></Button>
+        <Button asChild><a href={method.url} target={locale === 'pt' ? '_self' : '_blank'} rel="noopener noreferrer">{method.id === 'mercado-pago' ? 'Continuar no Mercado Pago' : `${c.open} ${method.name}`}<Icon name="arrow" /></a></Button>
         <Button variant="outline" type="button" onClick={() => copyDetail(method.id, method.value)}>
           {copied === method.id ? c.copied : method.copyLabel}<Icon name="copy" />
         </Button>

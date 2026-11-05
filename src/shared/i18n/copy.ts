@@ -23,7 +23,7 @@ export const copy = {
     messagesDescription:
       'Deixe uma mensagem de carinho para quem está celebrando.',
     details: 'Ver detalhes',
-    give: 'Presentar',
+    give: 'Presentear',
     close: 'Fechar detalhes',
     giftDescription:
       'Um presente simbólico para fazer parte do nosso novo cantinho.',

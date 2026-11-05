@@ -9,11 +9,6 @@ import { GiftPayments } from './GiftPayments';
 export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale }) {
   const c = copy[locale];
   const price = giftPrice(gift, locale) ?? c.pricePending;
-  const paymentButton = gift.paymentUrl && gift.priceCents !== null ? (
-    <Button variant="secondary" asChild>
-      <a href={gift.paymentUrl} target="_self" rel="noopener noreferrer" aria-label={`${c.give}: ${gift.name}`}>{c.give}</a>
-    </Button>
-  ) : <Button disabled aria-label={`${c.give}: ${gift.name}`}>{gift.priceCents === null ? c.pricePending : c.paymentPending}</Button>;
 
   return (
     <article className="gift-card">
@@ -27,9 +22,9 @@ export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale 
           <h3 title={gift.name}>{gift.name}</h3>
           <p className="gift-price">{price}</p>
           <div className="gift-action">
-            {locale === 'pt' ? paymentButton : <Dialog.Trigger asChild>
+            <Dialog.Trigger asChild>
               <Button variant="secondary" aria-label={`${c.give}: ${gift.name}`}>{c.give}</Button>
-            </Dialog.Trigger>}
+            </Dialog.Trigger>
           </div>
         </div>
         <Dialog.Portal>
@@ -41,9 +36,9 @@ export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale 
             <Dialog.Description>{gift.description || c.giftDescription}</Dialog.Description>
             <p className="gift-price">{price}</p>
             <p>{c.paymentNote}</p>
-            {locale === 'en' ? (
+            {locale === 'en' || gift.paymentUrl && gift.priceCents !== null ? (
               <GiftPayments gift={gift} locale={locale} />
-            ) : paymentButton}
+            ) : <Button disabled>{gift.priceCents === null ? c.pricePending : c.paymentPending}</Button>}
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

@@ -15,4 +15,3 @@ export function renderGallery(locale: Locale) { return renderToStaticMarkup(<Fam
 export function renderPayments(gift: Gift, locale: Locale) { return renderToStaticMarkup(<GiftPayments gift={gift} locale={locale} />); }
 export function renderPaymentPage(giftId: string | null) { return renderToStaticMarkup(<Payment giftId={giftId} />); }
 export { giftCatalog, giftPrice };
-export { paymentPagePath } from '../../src/features/give-gift/GiftPayments';
