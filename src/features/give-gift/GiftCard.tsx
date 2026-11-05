@@ -4,11 +4,16 @@ import { copy } from '../../shared/i18n/copy';
 import type { Locale } from '../../shared/i18n/locale';
 import { Button } from '../../shared/ui/button';
 import { Icon } from '../../shared/ui/icon';
-import { GiftPayments } from './GiftPayments';
+import { GiftPayments, paymentPagePath } from './GiftPayments';
 
 export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale }) {
   const c = copy[locale];
   const price = giftPrice(gift, locale) ?? c.pricePending;
+  const paymentButton = gift.paymentUrl && gift.priceCents !== null ? (
+    <Button variant="secondary" asChild>
+      <a href={paymentPagePath(gift.id)} target="_blank" rel="noopener noreferrer" aria-label={`${c.give}: ${gift.name}`}>{c.give}</a>
+    </Button>
+  ) : <Button disabled aria-label={`${c.give}: ${gift.name}`}>{gift.priceCents === null ? c.pricePending : c.paymentPending}</Button>;
 
   return (
     <article className="gift-card">
@@ -22,9 +27,9 @@ export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale 
           <h3 title={gift.name}>{gift.name}</h3>
           <p className="gift-price">{price}</p>
           <div className="gift-action">
-            <Dialog.Trigger asChild>
+            {locale === 'pt' ? paymentButton : <Dialog.Trigger asChild>
               <Button variant="secondary" aria-label={`${c.give}: ${gift.name}`}>{c.give}</Button>
-            </Dialog.Trigger>
+            </Dialog.Trigger>}
           </div>
         </div>
         <Dialog.Portal>
@@ -36,9 +41,9 @@ export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale 
             <Dialog.Description>{gift.description || c.giftDescription}</Dialog.Description>
             <p className="gift-price">{price}</p>
             <p>{c.paymentNote}</p>
-            {locale === 'en' || gift.paymentUrl && gift.priceCents !== null ? (
+            {locale === 'en' ? (
               <GiftPayments gift={gift} locale={locale} />
-            ) : <Button disabled>{gift.priceCents === null ? c.pricePending : c.paymentPending}</Button>}
+            ) : paymentButton}
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

@@ -37,19 +37,13 @@ export function paymentPagePath(giftId: string) {
   return `${import.meta.env.BASE_URL}pt/pagamento/?presente=${encodeURIComponent(giftId)}`;
 }
 
-export async function copyPaymentLink(url: string, giftId: string) {
-  const copying = navigator.clipboard.writeText(url);
-  window.open(paymentPagePath(giftId), '_blank', 'noopener,noreferrer');
-  await copying;
-}
-
 export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
   const c = labels[locale];
   const methods = locale === 'en' ? internationalMethods : [
     ...(gift.paymentUrl && gift.priceCents !== null ? [{
       id: 'mercado-pago', name: 'Mercado Pago',
       description: copy.pt.paymentDisclaimer,
-      url: gift.paymentUrl, value: gift.paymentUrl, copyLabel: 'Copiar e abrir link',
+      url: gift.paymentUrl, value: gift.paymentUrl, copyLabel: 'Copiar link',
     }] : []),
     { ...internationalMethods[1], description: 'Use nossa Wisetag para enviar o valor que quiser.', copyLabel: 'Copiar Wisetag' },
   ];
@@ -60,8 +54,7 @@ export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
     setCopied(null);
     setCopyError(null);
     try {
-      if (id === 'mercado-pago') await copyPaymentLink(value, gift.id);
-      else await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(value);
       setCopied(id);
     } catch {
       setCopyError(id);
@@ -78,7 +71,8 @@ export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
       <p className="payment-description">{method.description}</p>
       <p className="payment-detail">{method.value}</p>
       <div className="payment-actions">
-        <Button asChild><a href={method.id === 'mercado-pago' ? paymentPagePath(gift.id) : method.url} target="_blank" rel="noopener noreferrer">{c.open} {method.name}<Icon name="arrow" /></a></Button>
+        {/* Mercado Pago continues in the already loaded payment tab to avoid another initial app-handoff navigation. */}
+        <Button asChild><a href={method.url} target={method.id === 'mercado-pago' ? '_self' : '_blank'} rel="noopener noreferrer">{method.id === 'mercado-pago' ? 'Continuar no Mercado Pago' : `${c.open} ${method.name}`}<Icon name="arrow" /></a></Button>
         <Button variant="outline" type="button" onClick={() => copyDetail(method.id, method.value)}>
           {copied === method.id ? c.copied : method.copyLabel}<Icon name="copy" />
         </Button>
