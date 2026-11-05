@@ -1,6 +1,10 @@
 export const copy = {
   pt: {
     home: 'Início',
+    photos: 'Fotos',
+    familyPictures: 'Fotos da nossa família',
+    viewFamilyPhotos: 'Veja as fotos da nossa família',
+    openPhoto: 'Abrir foto',
     gifts: 'Presentes',
     attendance: 'Presença',
     messages: 'Recados',
@@ -48,6 +52,10 @@ export const copy = {
   },
   en: {
     home: 'Home',
+    photos: 'Photos',
+    familyPictures: 'Our family pictures',
+    viewFamilyPhotos: 'Our family pics',
+    openPhoto: 'Open picture',
     gifts: 'Gifts',
     attendance: '',
     messages: 'Leave a message!',

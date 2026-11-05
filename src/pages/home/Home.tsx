@@ -4,6 +4,7 @@ import catalog from '../../entities/gift/catalog.json';
 import { eventCountdown } from '../../entities/event/countdown';
 import { GiftCard } from '../../features/give-gift/GiftCard';
 import { Form } from '../../features/respond/Form';
+import { FamilyGallery } from '../../features/family-gallery/FamilyGallery';
 import { Button } from '../../shared/ui/button';
 import { Icon } from '../../shared/ui/icon';
 import { giftCatalog } from '../../entities/gift/model';
@@ -23,6 +24,7 @@ export function Home({ locale = 'pt' }: { locale?: Locale }) {
     { id: 'presentes', label: c.gifts, icon: 'gift' },
     ...(!international ? [{ id: 'presenca', label: c.attendance, icon: 'calendar' } as const] : []),
     ...(showMessages ? [{ id: 'recados', label: c.messages, icon: 'message' } as const] : []),
+    { id: 'fotos', label: c.photos, icon: 'photo' },
   ] as const;
   const sectionFromHash = () => sections.find(item => `#${item.id}` === (typeof window === 'undefined' ? '' : window.location.hash))?.id ?? 'inicio';
   const [section, setSection] = useState<string>(sectionFromHash);
@@ -76,6 +78,7 @@ export function Home({ locale = 'pt' }: { locale?: Locale }) {
             <a href="#presentes" onClick={scrollToContent}><Icon name="gift" />{c.gifts}</a>
             {!international && <a href={mapsUrl} target="_blank" rel="noopener noreferrer"><Icon name="pin" />Como chegar<span className="sr-only"> (abre em outra aba)</span></a>}
             {showMessages && <a href="#recados" onClick={scrollToContent}><Icon name="message" />{c.messages}</a>}
+            {international && <a href="#fotos" onClick={scrollToContent}><Icon name="photo" />{c.viewFamilyPhotos}</a>}
           </nav>
         </aside>
         <div className="event-content">
@@ -119,7 +122,7 @@ export function Home({ locale = 'pt' }: { locale?: Locale }) {
                 </section>}
               </Tabs.Content>
               <Tabs.Content value="presentes" className="catalog-panel">
-                <h2>{c.giftList}</h2>
+                <h2 className="page-title">{c.giftList}</h2>
                 <div className="catalog-filter"><span>{c.all} ({items.length})</span></div>
                 <p className="catalog-note">{c.giftNote}</p>
                 <div className="gift-grid">
@@ -128,17 +131,20 @@ export function Home({ locale = 'pt' }: { locale?: Locale }) {
               </Tabs.Content>
               {!international && <Tabs.Content value="presenca" className="rsvp-panel">
                 <p className="eyebrow">confirmação de presença</p>
-                <h2>Você vem?</h2>
+                <h2 className="page-title">Você vem?</h2>
                 <p className="section-description">Sábado, 19 de dezembro, às 15h. Sua resposta ajuda a organizar a festa.</p>
                 <Form rsvp />
               </Tabs.Content>}
               {showMessages && <Tabs.Content value="recados" className="messages-panel">
-                <h2>{c.messages}</h2>
+                <h2 className="page-title">{c.messages}</h2>
                 <div className="surface message-card">
                   <p className="section-description">{c.messagesDescription}</p>
                   <Form locale={locale} />
                 </div>
               </Tabs.Content>}
+              <Tabs.Content value="fotos">
+                <FamilyGallery locale={locale} />
+              </Tabs.Content>
             </main>
           </Tabs.Root>
           <footer className="event-footer"><p>República da Brisinha</p>{!international && <span>Vida longa à República da Brisinha! 🌿🐾</span>}</footer>

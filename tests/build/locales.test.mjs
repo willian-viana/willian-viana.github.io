@@ -9,10 +9,11 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 const result = spawnSync('pnpm', ['exec', 'vite', 'build', '--ssr', 'tests/fixtures/render-locales.tsx', '--outDir', '.test-build', '--logLevel', 'warn'], { encoding: 'utf8' });
 assert.equal(result.status, 0, result.stdout + result.stderr);
-const { renderPage, renderCard, renderForm, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
+const { renderPage, renderCard, renderForm, renderGallery, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
 const original = JSON.parse(readFileSync('src/entities/gift/catalog.json', 'utf8'));
 const english = JSON.parse(readFileSync('src/entities/gift/catalog.en.json', 'utf8'));
 const content = JSON.parse(readFileSync('src/entities/event/content.en.json', 'utf8'));
+const photos = JSON.parse(readFileSync('src/entities/family-photo/photos.json', 'utf8'));
 
 test('Portuguese retains the original welcome, attendance and original BRL catalog', () => {
   const html = renderPage('pt');
@@ -75,6 +76,21 @@ test('neither locale renders language-switching pills or links', () => {
     const html = renderPage(locale);
     assert.ok(!html.includes('class="language-switcher"'));
     assert.ok(!/href="\/(pt|en)\//.test(html));
+  }
+});
+
+test('both locales provide the family gallery with lazy previews and localized titles', () => {
+  for (const [locale, title, tab] of [['pt', 'Fotos da nossa família', 'Fotos'], ['en', 'Our family pictures', 'Photos']]) {
+    assert.ok(renderPage(locale).includes(`>${tab}</button>`));
+    const html = renderGallery(locale);
+    assert.ok(html.includes(title));
+    assert.equal((html.match(/<img /g) || []).length, photos.length);
+    for (const photo of photos) {
+      assert.ok(html.includes(`src="/${photo.thumbnail}"`));
+      assert.ok(!html.includes(photo.full));
+      assert.ok(!html.includes(`/pictures/${photo.file}`));
+    }
+    assert.equal((html.match(/loading="lazy"/g) || []).length, photos.length);
   }
 });
 

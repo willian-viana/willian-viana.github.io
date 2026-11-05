@@ -9,6 +9,7 @@ const paths = {
   list: 'M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3M9 2h6v5H9zM8 12h.01M12 12h4M8 17h.01M12 17h4',
   arrow: 'M7 17 17 7M7 7h10v10',
   close: 'm6 6 12 12M6 18 18 6',
+  photo: 'M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM3 16l5-5 5 5 3-3 5 5M17 8h.01',
 } as const;
 
 export function Icon({ name, ...props }: SVGProps<SVGSVGElement> & { name: keyof typeof paths }) {
