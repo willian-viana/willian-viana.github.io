@@ -95,17 +95,17 @@ test('both locales provide the family gallery with lazy previews and localized t
   }
 });
 
-test('Brazilian catalog has only a Presentar link to the selected gift payment page', () => {
+test('Brazilian Presentar links go directly to each configured checkout in the same tab', () => {
   for (const gift of giftCatalog('pt')) {
     const html = renderCard(gift, 'pt');
     const links = [...html.matchAll(/<a\b[^>]*>Presentar<\/a>/g)];
     assert.equal(links.length, 1, gift.id);
     const link = links[0][0];
-    assert.ok(link.includes(`href="${paymentPagePath(gift.id)}"`), gift.id);
-    assert.ok(link.includes('target="_blank"'), gift.id);
+    assert.ok(link.includes(`href="${gift.paymentUrl}"`), gift.id);
+    assert.ok(link.includes('target="_self"'), gift.id);
     assert.ok(link.includes('rel="noopener noreferrer"'), gift.id);
     assert.match(html, /<button[^>]*aria-label="Ver detalhes:/);
-    for (const text of ['mpago.la', 'Mercado Pago', 'wise.com', 'willianb67', 'Copiar link', 'payment-method']) {
+    for (const text of ['/pt/pagamento/', 'Mercado Pago', 'wise.com', 'willianb67', 'Copiar link', 'payment-method']) {
       assert.ok(!html.includes(text), `${gift.id}: ${text}`);
     }
   }

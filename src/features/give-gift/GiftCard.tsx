@@ -4,14 +4,14 @@ import { copy } from '../../shared/i18n/copy';
 import type { Locale } from '../../shared/i18n/locale';
 import { Button } from '../../shared/ui/button';
 import { Icon } from '../../shared/ui/icon';
-import { GiftPayments, paymentPagePath } from './GiftPayments';
+import { GiftPayments } from './GiftPayments';
 
 export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale }) {
   const c = copy[locale];
   const price = giftPrice(gift, locale) ?? c.pricePending;
   const paymentButton = gift.paymentUrl && gift.priceCents !== null ? (
     <Button variant="secondary" asChild>
-      <a href={paymentPagePath(gift.id)} target="_blank" rel="noopener noreferrer" aria-label={`${c.give}: ${gift.name}`}>{c.give}</a>
+      <a href={gift.paymentUrl} target="_self" rel="noopener noreferrer" aria-label={`${c.give}: ${gift.name}`}>{c.give}</a>
     </Button>
   ) : <Button disabled aria-label={`${c.give}: ${gift.name}`}>{gift.priceCents === null ? c.pricePending : c.paymentPending}</Button>;
 
