@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 const result = spawnSync('pnpm', ['exec', 'vite', 'build', '--ssr', 'tests/fixtures/render-locales.tsx', '--outDir', '.test-build', '--logLevel', 'warn'], { encoding: 'utf8' });
 assert.equal(result.status, 0, result.stdout + result.stderr);
-const { renderPage, renderCard, renderForm, renderGallery, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
+const { renderPage, renderCard, renderForm, renderGallery, renderInternationalPayments, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
 const original = JSON.parse(readFileSync('src/entities/gift/catalog.json', 'utf8'));
 const english = JSON.parse(readFileSync('src/entities/gift/catalog.en.json', 'utf8'));
 const content = JSON.parse(readFileSync('src/entities/event/content.en.json', 'utf8'));
@@ -117,4 +117,20 @@ test('English gift actions keep opening details and never use Brazilian checkout
   const pending = renderCard({ ...pt, paymentUrl: null }, 'pt');
   assert.ok(!/<a\b[^>]*>Presentear<\/a>/.test(pending));
   assert.match(pending, /<button[^>]*aria-label="Presentear:/);
+});
+
+test('international contributions use the supplied PayPal and Wise details', () => {
+  const html = renderInternationalPayments();
+  for (const url of ['https://www.paypal.com/myaccount/transfer/send', 'https://wise.com/pay/me/willianb67']) {
+    const link = html.match(new RegExp(`<a[^>]*href="${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>`))?.[0];
+    assert.ok(link, url);
+    assert.ok(link.includes('target="_blank"'));
+    assert.ok(link.includes('rel="noopener noreferrer"'));
+  }
+  for (const text of ['PayPal', 'Wise', 'Copy email', 'Copy Wisetag', 'willian.batista.viana@gmail.com', '@willianb67', 'Amount of your choice']) {
+    assert.ok(html.includes(text), text);
+  }
+  assert.ok(!html.includes('<img'));
+  assert.ok(!html.includes('QR code'));
+  assert.ok(!html.includes('International payment link coming soon'));
 });

@@ -4,6 +4,7 @@ import { copy } from '../../shared/i18n/copy';
 import type { Locale } from '../../shared/i18n/locale';
 import { Button } from '../../shared/ui/button';
 import { Icon } from '../../shared/ui/icon';
+import { InternationalPayments } from './InternationalPayments';
 
 export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale }) {
   const c = copy[locale];
@@ -39,7 +40,7 @@ export function GiftCard({ gift, locale = 'pt' }: { gift: Gift; locale?: Locale 
             <Dialog.Description>{gift.description || c.giftDescription}</Dialog.Description>
             <p className="gift-price">{price}</p>
             <p>{c.paymentNote}</p>
-            {gift.paymentUrl && gift.priceCents !== null ? (
+            {locale === 'en' ? <InternationalPayments /> : gift.paymentUrl && gift.priceCents !== null ? (
               <Button asChild><a href={gift.paymentUrl} target="_blank" rel="noopener noreferrer">{c.pay} <Icon name="arrow" /></a></Button>
             ) : <Button disabled>{gift.priceCents === null ? c.pricePending : c.paymentPending}</Button>}
           </Dialog.Content>

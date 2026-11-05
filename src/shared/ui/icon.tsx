@@ -10,6 +10,8 @@ const paths = {
   arrow: 'M7 17 17 7M7 7h10v10',
   close: 'm6 6 12 12M6 18 18 6',
   photo: 'M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM3 16l5-5 5 5 3-3 5 5M17 8h.01',
+  wallet: 'M21 8H5a2 2 0 0 1 0-4h13v4M3 6v13a2 2 0 0 0 2 2h16V8M21 12h-5v5h5M17 14.5h.01',
+  copy: 'M9 8V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3M5 8h8a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3Z',
 } as const;
 
 export function Icon({ name, ...props }: SVGProps<SVGSVGElement> & { name: keyof typeof paths }) {
