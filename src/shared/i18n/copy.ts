@@ -29,6 +29,8 @@ export const copy = {
       'Um presente simbólico para fazer parte do nosso novo cantinho.',
     paymentNote:
       'O presente é simbólico. O pagamento é feito em um serviço externo, diretamente para os anfitriões.',
+    paymentDisclaimer:
+      'Se o Mercado Pago tentar abrir o aplicativo ou fechar a página, copie o link de pagamento e cole diretamente no navegador do seu celular.',
     pay: 'Ir para pagamento',
     paymentPending: 'Link de pagamento em breve',
     pricePending: 'Valor em breve',

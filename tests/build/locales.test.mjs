@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 const result = spawnSync('pnpm', ['exec', 'vite', 'build', '--ssr', 'tests/fixtures/render-locales.tsx', '--outDir', '.test-build', '--logLevel', 'warn'], { encoding: 'utf8' });
 assert.equal(result.status, 0, result.stdout + result.stderr);
-const { renderPage, renderCard, renderForm, renderGallery, renderPayments, copyPaymentLink, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
+const { renderPage, renderCard, renderForm, renderGallery, renderPayments, renderPaymentPage, copyPaymentLink, paymentPagePath, giftCatalog, giftPrice } = await import(pathToFileURL(resolve('.test-build/render-locales.js')).href);
 const original = JSON.parse(readFileSync('src/entities/gift/catalog.json', 'utf8'));
 const english = JSON.parse(readFileSync('src/entities/gift/catalog.en.json', 'utf8'));
 const content = JSON.parse(readFileSync('src/entities/event/content.en.json', 'utf8'));
@@ -63,7 +63,7 @@ test('English prices and links are independent and use USD once configured', () 
 
 test('GitHub Pages contains real localized entrypoints that reference root assets', () => {
   const root = readFileSync('dist/index.html', 'utf8');
-  for (const [locale, lang] of [['pt', 'pt-BR'], ['en', 'en']]) {
+  for (const [locale, lang] of [['pt', 'pt-BR'], ['en', 'en'], ['pt/pagamento', 'pt-BR']]) {
     const html = readFileSync(`dist/${locale}/index.html`, 'utf8');
     assert.ok(html.includes(`lang="${lang}"`));
     assert.equal(html.replace(`lang="${lang}"`, 'lang="pt-BR"'), root);
@@ -103,7 +103,7 @@ test('Brazilian Presentear opens options with the product checkout, copy action 
     const payments = renderPayments(gift, 'pt');
     const link = payments.match(/<a\b[^>]*>Abrir Mercado Pago<svg[\s\S]*?<\/a>/)?.[0];
     assert.ok(link, gift.id);
-    assert.ok(link.includes(`href="${gift.paymentUrl}"`), gift.id);
+    assert.ok(link.includes(`href="${paymentPagePath(gift.id)}"`), gift.id);
     assert.ok(link.includes('target="_blank"'), gift.id);
     assert.ok(link.includes('rel="noopener noreferrer"'), gift.id);
     assert.ok(payments.includes(`<p class="payment-detail">${gift.paymentUrl}</p>`), gift.id);
@@ -116,10 +116,11 @@ test('Brazilian Presentear opens options with the product checkout, copy action 
   }
 });
 
-test('copying a payment link opens its secure new tab before clipboard completion and preserves failures', async () => {
+test('copying a payment link opens the local payment page before clipboard completion and preserves failures', async () => {
   const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
   const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
-  const url = giftCatalog('pt')[0].paymentUrl;
+  const gift = giftCatalog('pt')[0];
+  const url = gift.paymentUrl;
   let resolveCopy;
   let clipboard = new Promise(resolve => { resolveCopy = resolve; });
   const copies = [];
@@ -127,13 +128,13 @@ test('copying a payment link opens its secure new tab before clipboard completio
   Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { clipboard: { writeText: value => { copies.push(value); return clipboard; } } } });
   Object.defineProperty(globalThis, 'window', { configurable: true, value: { open: (...args) => { opened.push(args); return null; } } });
   try {
-    const pending = copyPaymentLink(url);
+    const pending = copyPaymentLink(url, gift.id);
     assert.deepEqual(copies, [url]);
-    assert.deepEqual(opened, [[url, '_blank', 'noopener,noreferrer']]);
+    assert.deepEqual(opened, [[paymentPagePath(gift.id), '_blank', 'noopener,noreferrer']]);
     resolveCopy();
     await pending;
     clipboard = Promise.reject(new Error('Clipboard denied'));
-    await assert.rejects(copyPaymentLink(url), /Clipboard denied/);
+    await assert.rejects(copyPaymentLink(url, gift.id), /Clipboard denied/);
     assert.equal(opened.length, 2);
   } finally {
     if (navigatorDescriptor) Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
@@ -141,6 +142,27 @@ test('copying a payment link opens its secure new tab before clipboard completio
     if (windowDescriptor) Object.defineProperty(globalThis, 'window', windowDescriptor);
     else delete globalThis.window;
   }
+});
+
+test('payment page continues in the current tab using only the selected catalog checkout', () => {
+  for (const gift of giftCatalog('pt')) {
+    const html = renderPaymentPage(gift.id);
+    const link = html.match(/<a\b[^>]*>Continuar no Mercado Pago[\s\S]*?<\/a>/)?.[0];
+    assert.ok(link, gift.id);
+    assert.ok(link.includes(`href="${gift.paymentUrl}"`), gift.id);
+    assert.ok(link.includes('target="_self"'), gift.id);
+    assert.ok(link.includes('rel="noopener noreferrer"'), gift.id);
+    assert.ok(html.includes('Copiar link sem abrir'));
+    assert.ok(!html.includes('<script'));
+  }
+  for (const id of [null, 'unknown', 'https://untrusted.example/payment', '<script>alert(1)</script>']) {
+    const html = renderPaymentPage(id);
+    assert.ok(html.includes('Presente indisponível'));
+    assert.ok(!html.includes('mpago.la'));
+    assert.ok(!html.includes('Continuar no Mercado Pago'));
+    assert.ok(!html.includes('untrusted.example'));
+  }
+  assert.equal(paymentPagePath('a&presente=b'), '/pt/pagamento/?presente=a%26presente%3Db');
 });
 
 test('English gift actions keep opening details and never use Brazilian checkout links', () => {

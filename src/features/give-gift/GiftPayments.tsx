@@ -3,6 +3,7 @@ import type { Gift } from '../../entities/gift/model';
 import type { Locale } from '../../shared/i18n/locale';
 import { Button } from '../../shared/ui/button';
 import { Icon } from '../../shared/ui/icon';
+import { copy } from '../../shared/i18n/copy';
 
 const internationalMethods = [
   {
@@ -32,10 +33,13 @@ const labels = {
   },
 };
 
-export async function copyPaymentLink(url: string) {
+export function paymentPagePath(giftId: string) {
+  return `${import.meta.env.BASE_URL}pt/pagamento/?presente=${encodeURIComponent(giftId)}`;
+}
+
+export async function copyPaymentLink(url: string, giftId: string) {
   const copying = navigator.clipboard.writeText(url);
-  // Open during the click, before awaiting clipboard access, to preserve the user gesture.
-  window.open(url, '_blank', 'noopener,noreferrer');
+  window.open(paymentPagePath(giftId), '_blank', 'noopener,noreferrer');
   await copying;
 }
 
@@ -44,7 +48,7 @@ export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
   const methods = locale === 'en' ? internationalMethods : [
     ...(gift.paymentUrl && gift.priceCents !== null ? [{
       id: 'mercado-pago', name: 'Mercado Pago',
-      description: 'Se o Mercado Pago tentar abrir o aplicativo ou fechar a página, copie o link de pagamento e cole diretamente no navegador do seu celular.',
+      description: copy.pt.paymentDisclaimer,
       url: gift.paymentUrl, value: gift.paymentUrl, copyLabel: 'Copiar e abrir link',
     }] : []),
     { ...internationalMethods[1], description: 'Use nossa Wisetag para enviar o valor que quiser.', copyLabel: 'Copiar Wisetag' },
@@ -56,7 +60,7 @@ export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
     setCopied(null);
     setCopyError(null);
     try {
-      if (id === 'mercado-pago') await copyPaymentLink(value);
+      if (id === 'mercado-pago') await copyPaymentLink(value, gift.id);
       else await navigator.clipboard.writeText(value);
       setCopied(id);
     } catch {
@@ -74,7 +78,7 @@ export function GiftPayments({ gift, locale }: { gift: Gift; locale: Locale }) {
       <p className="payment-description">{method.description}</p>
       <p className="payment-detail">{method.value}</p>
       <div className="payment-actions">
-        <Button asChild><a href={method.url} target="_blank" rel="noopener noreferrer">{c.open} {method.name}<Icon name="arrow" /></a></Button>
+        <Button asChild><a href={method.id === 'mercado-pago' ? paymentPagePath(gift.id) : method.url} target="_blank" rel="noopener noreferrer">{c.open} {method.name}<Icon name="arrow" /></a></Button>
         <Button variant="outline" type="button" onClick={() => copyDetail(method.id, method.value)}>
           {copied === method.id ? c.copied : method.copyLabel}<Icon name="copy" />
         </Button>

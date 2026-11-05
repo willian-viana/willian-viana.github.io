@@ -234,3 +234,11 @@ button, a { touch-action: manipulation; }
 @media (min-width: 480px) {
   .payment-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+.payment-page { width: calc(100% - 32px); max-width: 560px; margin: 24px auto; padding: 24px; background: #fff; }
+.payment-page h1 { margin: 16px 0; font: 400 44px/1.1 Katibeh, Georgia, serif; }
+.payment-page h2 { font-size: 32px; line-height: 1.15; }
+.payment-page p { margin: 16px 0; line-height: 1.5; }
+.payment-page .gift-price { font-size: 24px; font-weight: 600; }
+.payment-page .button { width: 100%; margin-top: 12px; }
+.payment-page [role="status"]:empty { display: none; }

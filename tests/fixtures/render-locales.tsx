@@ -4,6 +4,7 @@ import { GiftCard } from '../../src/features/give-gift/GiftCard';
 import { Form } from '../../src/features/respond/Form';
 import { FamilyGallery } from '../../src/features/family-gallery/FamilyGallery';
 import { GiftPayments } from '../../src/features/give-gift/GiftPayments';
+import { Payment } from '../../src/pages/payment/Payment';
 import { giftCatalog, giftPrice, type Gift } from '../../src/entities/gift/model';
 import type { Locale } from '../../src/shared/i18n/locale';
 
@@ -12,5 +13,6 @@ export function renderCard(gift: Gift, locale: Locale) { return renderToStaticMa
 export function renderForm(locale: Locale, rsvp: boolean) { return renderToStaticMarkup(<Form locale={locale} rsvp={rsvp} />); }
 export function renderGallery(locale: Locale) { return renderToStaticMarkup(<FamilyGallery locale={locale} />); }
 export function renderPayments(gift: Gift, locale: Locale) { return renderToStaticMarkup(<GiftPayments gift={gift} locale={locale} />); }
+export function renderPaymentPage(giftId: string | null) { return renderToStaticMarkup(<Payment giftId={giftId} />); }
 export { giftCatalog, giftPrice };
-export { copyPaymentLink } from '../../src/features/give-gift/GiftPayments';
+export { copyPaymentLink, paymentPagePath } from '../../src/features/give-gift/GiftPayments';
